@@ -4,6 +4,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
+    tablist: path.resolve(__dirname, './src/tablist/tablist.jsx'),
     popup: path.resolve(__dirname, './src/popup/popup.jsx'),
     options: path.resolve(__dirname, './src/options/options.jsx'),
     service_worker: {
@@ -33,6 +34,12 @@ module.exports = {
 
   plugins: [
     new HtmlWebpackPlugin({
+      chunks: ['tablist'],
+      template: path.resolve(__dirname, './public/template.html'),
+      filename: 'tablist/tablist.html',
+      title: 'tablist',
+    }),
+    new HtmlWebpackPlugin({
       chunks: ['popup'],
       template: path.resolve(__dirname, './public/template.html'),
       filename: 'popup/popup.html',
@@ -55,6 +62,7 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   },
   target: 'web',
+  devtool: 'cheap-module-source-map',
   // mode: 'production',
   mode: 'development',
 };

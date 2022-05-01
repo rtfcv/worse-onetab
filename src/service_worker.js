@@ -33,10 +33,7 @@ chrome.contextMenus.onClicked.addListener((args)=>{
 chrome.action.onClicked.addListener(handleBrowserActionClicked) // only works for Mv3
 
 function handleBrowserActionClicked(tab) {
-    const opts = {
-        url: chrome.runtime.getURL('hello.html')
-    };
-    chrome.windows.create(opts, handleWindowCreated);
+    showTabList();
 }
 
 
@@ -46,15 +43,15 @@ function handleWindowCreated(window) {
 
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-    if (msg == 'sayHello') {return sayHello();};
+    if (msg == 'showTabList') {return showTabList();};
     if (msg == 'toggleAction') {return toggleAction(sendResponse);};
     if (msg == 'getActionState') {return getActionState(sendResponse);};
 });
 
 
-function sayHello() {
+function showTabList() {
     const opts = {
-        url: chrome.runtime.getURL('hello.html')
+        url: chrome.runtime.getURL('tablist/tablist.html')
     };
     chrome.windows.create(opts, handleWindowCreated);
     return true;
@@ -88,8 +85,8 @@ function toggleAction(sendResponse) {
 function getActionState(sendResponse){
     state = chrome.action.getPopup({});
     state.then((result)=>{
-        console.log("state of popup is: "+result);
-        if (state == ""){
+        console.log('state of popup is: '+result);
+        if (state == ''){
             sendResponse('enable');
         } else {
             sendResponse('disable');
