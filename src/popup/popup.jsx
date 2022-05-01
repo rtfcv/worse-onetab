@@ -1,5 +1,6 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+// import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 // import styled from 'styled-components';
 
 function showTabList() {
@@ -34,7 +35,10 @@ class Popup extends React.Component {
 }
 
 
-ReactDOM.render(
-  <Popup />,
-  document.getElementById('root')
-);
+// ReactDOM.render(
+//   <Popup />,
+//   document.getElementById('root')
+// );
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<Popup />);
