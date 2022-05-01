@@ -1,0 +1,16 @@
+{
+  "name": "hoge",
+  "description": "hogehoge",
+  "version": "0.1",
+  "manifest_version": 3,
+  "permissions": [
+      "contextMenus"
+  ],
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "action": {
+      "default_popup": "popup/popup.html",
+      "default_title": "Click me to open a new window"
+  }
+}
