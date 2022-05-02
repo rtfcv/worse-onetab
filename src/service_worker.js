@@ -194,7 +194,7 @@ const openAndDeleteATab = (payload, updateTabLists) => {
             console.log({payload: payload});
 
             tabToOpen = rcvd.tabs[payload.index[0]][payload.index[1]];
-            if (tabToOpen.id == payload.tabID){
+            if (tabToOpen.id == payload.tabid){
                 console.log({id:tabToOpen.id, title:tabToOpen.title});
                 // chrome.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
                 chrome.tabs.create({url: tabToOpen.url, active:false});
@@ -202,7 +202,7 @@ const openAndDeleteATab = (payload, updateTabLists) => {
                 if (rcvd.tabs[payload.index[0]].length == 0){rcvd.tabs.splice(payload.index[0],1)}
             }else{
                 console.log('mismatch')
-                console.log({idToOpen:payload.tabID, idFromSavedData:tabToOpen.id , title:tabToOpen.title});
+                console.log({idToOpen:payload.tabid, idFromSavedData:tabToOpen.id , title:tabToOpen.title});
             }
 
             return rcvd.tabs;

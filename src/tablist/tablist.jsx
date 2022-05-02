@@ -55,10 +55,10 @@ function TablistList () {
     }, []); // need the second component to be empty to do this only when this first renders
 
     useEffect(() => {
-
         // list of cleanupFunctions
         let cleanList = [];
 
+        // top element of tablist
         const tabListList = document.getElementById('tablistlist-ul')
         const cTabListList = tabListList.children
 
@@ -70,22 +70,26 @@ function TablistList () {
 
             // loop through element of tablist li
             for (const ccc of cTab) {
+                const cTabTbody = ccc.children[0].children[0];
+                const cTabTr = cTabTbody.children[0];
+                const cTabElement = cTabTr.children; // should be [x button, tabData]
+
                 // callback function for a list element
                 const clickListener = ()=>{
                     const index = ccc.getAttribute('ijloc').split(','); // string 'i,j'
-                    const tabID = ccc.getAttribute('tabID');
+                    const tabid = ccc.getAttribute('tabid');
 
                     // log what has been clicked
-                    console.log({clicked: ccc, id: ccc.id, index: index, tabID: tabID});
+                    console.log({clicked: ccc, id: ccc.id, index: index, tabid: tabid});
 
                     // open page url: request service worker to open and pop the item from the list
                     // need to pass updateTabList to update
-                    chrome.runtime.sendMessage({msg:'openAndDeleteATab', payload:{index: index, tabID: tabID}}, updateTabList);
+                    chrome.runtime.sendMessage({msg:'openAndDeleteATab', payload:{index: index, tabid: tabid}}, updateTabList);
                 };
 
                 // add event listener function and clean list for removing this later
-                cleanList.push(()=>{ccc.removeEventListener('click', clickListener)});
-                ccc.addEventListener('click', clickListener, {once: true});
+                cleanList.push(()=>{cTabElement[1].removeEventListener('click', clickListener)});
+                cTabElement[1].addEventListener('click', clickListener, {once: true});
             }
         }
 
@@ -108,17 +112,38 @@ function TablistList () {
     return(
         <div className="TablistList" id="tablist-list">
         <ul id="tablistlist-ul">{
-            tabList.length > 0 && tabList.map((item, i) => <li>{'tablist-' + i}<ul id={'tablist-' + i}>{
-                item.length > 0 && item.map((subitem,j) => <li id={"li-"+i+'-'+j} ijloc={[i,j]} tabID={subitem.id}>{subitem.id}: <b>{subitem.title}</b><br/>{subitem.url}<br/></li>)
-            }</ul></li>)
+            (tabList.length > 0) && tabList.map((item, i) => {return(
+                <li key={'tablist-'+i}>
+                {'tablist-'+i}
+                <ul id={'tablist-'+i}>{
+                    (item.length > 0) && item.map((subitem,j) => {return (
+                        <li id={"li-"+i+'-'+j} key={"li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
+                            <table style={{display: 'inline-table', verticalAlign: 'middle'}}><tbody>
+                                <tr>
+                                    <td id={"close-li-"+i+'-'+j} key={"close-li-"+i+'-'+j}>[x]</td>
+                                    <td nowrap="nowrap" id={"span-li-"+i+'-'+j} key={"span-li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
+                                        {subitem.id}: <b>{subitem.title}</b><br/>{subitem.url}
+                                    </td>
+                                </tr>
+                            </tbody></table>
+                        </li>
+                    )})
+                }</ul>
+                </li>
+            )})
         }</ul>
         </div>
     );
 }
+                            //<button id={"close-li-"+i+'-'+j} key={"close-li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>x</button>
+                            //<button id={"span-li-"+i+'-'+j} key={"span-li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
+                            //    {subitem.id}: <b>{subitem.title}</b><br/>{subitem.url}
+                            //</button>
 
 
 class Tablist extends React.Component {
     componentDidMount(){
+        document.title = "OneTab - Tab Lists";
         chrome.runtime.sendMessage({msg: 'getActionState'}, (status)=>{updateStatus(status);});
         document.getElementById('toggleAction').addEventListener('click', toggleAction);
         document.getElementById('deleteData').addEventListener('click', deleteData);
