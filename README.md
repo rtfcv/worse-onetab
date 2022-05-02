@@ -4,11 +4,11 @@ opensource and simplist alternative to [OneTab](https://www.one-tab.com/).
 
 Inspired by [better-onetab](https://github.com/cnwangjie/better-onetab), which seems to be no-longer maintained, but is worse in every way except for performance.  
 
-## dependency
+## Dependencies
 
 WIP
 
-## build instruction
+## Build Instruction
 
 ```bash
 npm install
