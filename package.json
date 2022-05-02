@@ -7,8 +7,8 @@
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "rtfcv",
+  "license": "MIT",
   "dependencies": {
     "react": "^18.1.0",
     "react-dom": "^18.1.0"
