@@ -68,28 +68,43 @@ function TablistList () {
             const cc = cTabList[0]; // get tabList ul from tablist li
             const cTab = cc.children
 
+            // subscribe closing and opening tabGroup here
+
             // loop through element of tablist li
             for (const ccc of cTab) {
                 const cTabTbody = ccc.children[0].children[0];
                 const cTabTr = cTabTbody.children[0];
-                const cTabElement = cTabTr.children; // should be [x button, tabData]
+                const cTabElement = cTabTr.children; // should be [x button, tabData] (td, td)
 
                 // callback function for a list element
-                const clickListener = ()=>{
+                const openThisTab = ()=>{
+                    // ccc is the li containing table of tab data and button
                     const index = ccc.getAttribute('ijloc').split(','); // string 'i,j'
                     const tabid = ccc.getAttribute('tabid');
 
                     // log what has been clicked
-                    console.log({clicked: ccc, id: ccc.id, index: index, tabid: tabid});
+                    console.log({clicked: ccc, id: ccc.id, index: index, tabid: tabid, doOpen: true});
 
                     // open page url: request service worker to open and pop the item from the list
                     // need to pass updateTabList to update
-                    chrome.runtime.sendMessage({msg:'openAndDeleteATab', payload:{index: index, tabid: tabid}}, updateTabList);
+                    chrome.runtime.sendMessage({msg:'openAndDeleteATab', payload:{index: index, tabid: tabid, doOpen: true}}, updateTabList);
+                };
+
+                // callback function closing list element
+                const deleteThisTab = ()=>{
+                    const index = ccc.getAttribute('ijloc').split(','); // string 'i,j'
+                    const tabid = ccc.getAttribute('tabid');
+                    // log what has been clicked
+                    console.log({closing: ccc, id: ccc.id, index: index, tabid: tabid, doOpen: false});
+                    // need to pass updateTabList to update
+                    chrome.runtime.sendMessage({msg:'openAndDeleteATab', payload:{index: index, tabid: tabid, doOpen: false}}, updateTabList);
                 };
 
                 // add event listener function and clean list for removing this later
-                cleanList.push(()=>{cTabElement[1].removeEventListener('click', clickListener)});
-                cTabElement[1].addEventListener('click', clickListener, {once: true});
+                cleanList.push(()=>{cTabElement[1].removeEventListener('click', openThisTab)});
+                cleanList.push(()=>{cTabElement[0].removeEventListener('click', deleteThisTab)});
+                cTabElement[1].addEventListener('click', openThisTab, {once: true});
+                cTabElement[0].addEventListener('click', deleteThisTab, {once: true});
             }
         }
 
@@ -120,10 +135,8 @@ function TablistList () {
                         <li id={"li-"+i+'-'+j} key={"li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
                             <table style={{display: 'inline-table', verticalAlign: 'middle'}}><tbody>
                                 <tr>
-                                    <td id={"close-li-"+i+'-'+j} key={"close-li-"+i+'-'+j}>[x]</td>
-                                    <td nowrap="nowrap" id={"span-li-"+i+'-'+j} key={"span-li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
-                                        {subitem.id}: <b>{subitem.title}</b><br/>{subitem.url}
-                                    </td>
+                                    <td id={"close-li-"+i+'-'+j}>[x]</td>
+                                    <td nowrap="wrap">{subitem.id}: <b>{subitem.title}</b><br/>{subitem.url}</td>
                                 </tr>
                             </tbody></table>
                         </li>

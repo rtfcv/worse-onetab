@@ -51,6 +51,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg.msg == 'getTabMetadata') {return getTabMetadata(sendResponse);}
     if (msg.msg == 'deleteData') {return deleteData(sendResponse);}
     if (msg.msg == 'openAndDeleteATab') {return openAndDeleteATab(msg.payload, sendResponse);}
+    if (msg.msg == 'deleteATab') {return deleteATab(msg.payload, sendResponse);}
 });
 
 
@@ -58,7 +59,8 @@ function showTabList() {
     const opts = {
         url: chrome.runtime.getURL('tablist/tablist.html')
     };
-    chrome.windows.create(opts, handleWindowCreated);
+    //chrome.windows.create(opts, handleWindowCreated);
+    chrome.tabs.create(opts, handleWindowCreated);
     return true;
 }
 
@@ -196,8 +198,10 @@ const openAndDeleteATab = (payload, updateTabLists) => {
             tabToOpen = rcvd.tabs[payload.index[0]][payload.index[1]];
             if (tabToOpen.id == payload.tabid){
                 console.log({id:tabToOpen.id, title:tabToOpen.title});
-                // chrome.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
-                chrome.tabs.create({url: tabToOpen.url, active:false});
+                if(payload.doOpen){
+                    // chrome.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
+                    chrome.tabs.create({url: tabToOpen.url, active:false});
+                }
                 tabToOpen = rcvd.tabs[payload.index[0]].splice(payload.index[1],1)
                 if (rcvd.tabs[payload.index[0]].length == 0){rcvd.tabs.splice(payload.index[0],1)}
             }else{
@@ -213,5 +217,3 @@ const openAndDeleteATab = (payload, updateTabLists) => {
 
     return true;
 }
-
-
