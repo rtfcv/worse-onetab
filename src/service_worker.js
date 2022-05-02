@@ -50,7 +50,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg.msg == 'saveCurrentTabs') {return saveCurrentTabs(sendResponse);};
     if (msg.msg == 'getTabMetadata') {return getTabMetadata(sendResponse);}
     if (msg.msg == 'deleteData') {return deleteData(sendResponse);}
-    if (msg.msg == 'openAndDeleteATab') {return openAndDeleteATab(msg.payload);}
+    if (msg.msg == 'openAndDeleteATab') {return openAndDeleteATab(msg.payload, sendResponse);}
 });
 
 
@@ -185,7 +185,7 @@ const deleteData = (sendResponse) => {
     return true;
 }
 
-const openAndDeleteATab = (payload) => {
+const openAndDeleteATab = (payload, updateTabLists) => {
     const tabs = 'tabs';
 
     chrome.storage.local.get(tabs, (rcvd)=>{
@@ -207,8 +207,8 @@ const openAndDeleteATab = (payload) => {
 
             return rcvd.tabs;
         }).then(tabs=>{
-            chrome.storage.local.set({tabs: tabs});  // save tabs to storage
-        });
+            return chrome.storage.local.set({tabs: tabs});  // save tabs to storage
+        }).then(result=>{updateTabLists();}); // call the updater to update the state of the caller
     });
 
     return true;

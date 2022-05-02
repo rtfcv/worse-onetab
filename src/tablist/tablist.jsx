@@ -25,41 +25,67 @@ function toggleAction() {
 function deleteData() {
     if(window.confirm('Do you want to delete all data?')){
         console.log('dataDelete');
+        chrome.runtime.sendMessage({msg:'deleteData'}, (status)=>{updateStatus(status);});
     };
-    chrome.runtime.sendMessage({msg:'deleteData'}, (status)=>{updateStatus(status);});
 }
 
 
 function TablistList () {
     const [tabList, setTabList] = useState([]);
+    const [dummy, setDummy] = useState(0);
+
+    const updateTabList = () => {
+        chrome.runtime.sendMessage({msg:'getTabMetadata'},
+            (result)=>{
+                try{
+                    let tlLen = result.length;
+                    setTabList(result);
+                    setDummy(dummy+1);
+                }catch(e){
+                    console.log({some_error: e})
+                    setTabList([]);
+                    setDummy(dummy+1);
+                }
+            }
+        );
+    };
 
     useEffect(() => {
+        updateTabList();
+    }, []); // need the second component to be empty to do this only when this first renders
+
+    useEffect(() => {
+
         // list of cleanupFunctions
         let cleanList = [];
 
         const tabListList = document.getElementById('tablistlist-ul')
         const cTabListList = tabListList.children
 
+        // loop through list of tablist
         for (const c of cTabListList){
-            const cTabList = c.children
-            for (const cc of cTabList){
-                const cTab = cc.children
-                for (const ccc of cTab) {
-                    // call back for a list element
-                    const clickListener = ()=>{
-                        const index = ccc.getAttribute('ijloc').split(','); // string 'i,j'
-                        const tabID = ccc.getAttribute('tabID');
-                        // log what has been clicked
-                        console.log({clicked: ccc, id: ccc.id, index: index, tabID: tabID});
-                        // open page url: request service worker to open the clicked element :
-                        chrome.runtime.sendMessage({msg:'openAndDeleteATab', payload:{index: index, tabID: tabID}});
-                        // pop the item from the list
-                    };
+            const cTabList = c.children // should yield tablist li
+            const cc = cTabList[0]; // get tabList ul from tablist li
+            const cTab = cc.children
 
-                    // add event listener function and clean list for removing this later
-                    cleanList.push(()=>{ccc.removeEventListener('click', clickListener)});
-                    ccc.addEventListener('click', clickListener, {once: true});
-                }
+            // loop through element of tablist li
+            for (const ccc of cTab) {
+                // callback function for a list element
+                const clickListener = ()=>{
+                    const index = ccc.getAttribute('ijloc').split(','); // string 'i,j'
+                    const tabID = ccc.getAttribute('tabID');
+
+                    // log what has been clicked
+                    console.log({clicked: ccc, id: ccc.id, index: index, tabID: tabID});
+
+                    // open page url: request service worker to open and pop the item from the list
+                    // need to pass updateTabList to update
+                    chrome.runtime.sendMessage({msg:'openAndDeleteATab', payload:{index: index, tabID: tabID}}, updateTabList);
+                };
+
+                // add event listener function and clean list for removing this later
+                cleanList.push(()=>{ccc.removeEventListener('click', clickListener)});
+                ccc.addEventListener('click', clickListener, {once: true});
             }
         }
 
@@ -71,12 +97,6 @@ function TablistList () {
         };
     }, [tabList]); // need the second component to do this only when this first renders
 
-    // may be this should not run every render
-    chrome.runtime.sendMessage({msg:'getTabMetadata'},
-        (result)=>{
-            setTabList(result);
-        }
-    );
 
     const deleteItem = (index) => {
         let temp = tabList.filter((item, i) => i !== index);
@@ -98,24 +118,24 @@ function TablistList () {
 
 
 class Tablist extends React.Component {
-  componentDidMount(){
-    chrome.runtime.sendMessage({msg: 'getActionState'}, (status)=>{updateStatus(status);});
-    document.getElementById('toggleAction').addEventListener('click', toggleAction);
-    document.getElementById('deleteData').addEventListener('click', deleteData);
-  }
+    componentDidMount(){
+        chrome.runtime.sendMessage({msg: 'getActionState'}, (status)=>{updateStatus(status);});
+        document.getElementById('toggleAction').addEventListener('click', toggleAction);
+        document.getElementById('deleteData').addEventListener('click', deleteData);
+    }
 
-  render() {
-    return (
-      <div className="Tablist">
-        <div id="actionStatus"></div>
-        <button id="toggleAction">enable</button>
-        <hr/>
-        <TablistList />
-        <hr/>
-        <button id="deleteData">Delete All Data</button>
-      </div>
-    );
-  }
+    render() {
+        return (
+            <div className="Tablist">
+                <div id="actionStatus"></div>
+                <button id="toggleAction">enable</button>
+                <hr/>
+                <TablistList />
+                <hr/>
+                <button id="deleteData">Delete All Data</button>
+            </div>
+        );
+    }
 }
 
 
