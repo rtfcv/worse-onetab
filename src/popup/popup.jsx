@@ -4,12 +4,12 @@ import { createRoot } from 'react-dom/client';
 // import styled from 'styled-components';
 
 function showTabList() {
-    chrome.runtime.sendMessage('showTabList');
+    chrome.runtime.sendMessage({msg:'showTabList'});
 }
 
 function toggleAction() {
     chrome.runtime.sendMessage(
-        'toggleAction',
+        {msg: 'toggleAction'},
         (status) => {document.getElementById('toggleAction').textContent = status;}
     );
 }
@@ -17,7 +17,7 @@ function toggleAction() {
 function saveCurrentTabs () {
     console.log('trying to save tabs:');
     chrome.runtime.sendMessage(
-        'saveCurrentTabs',
+        {msg:'saveCurrentTabs'},
         // callback
         (tabs) => {
             console.log('saving tabs:');
@@ -30,7 +30,7 @@ function saveCurrentTabs () {
 class Popup extends React.Component {
   componentDidMount(){
     chrome.runtime.sendMessage(
-        'getActionState',
+        {msg:'getActionState'},
         (status) => {document.getElementById('toggleAction').textContent = status;}
     );
     document.getElementById('showTabList').addEventListener('click', showTabList);

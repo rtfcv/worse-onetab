@@ -43,12 +43,14 @@ function handleWindowCreated(window) {
 
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-    if (msg == 'showTabList') {return showTabList();};
-    if (msg == 'toggleAction') {return toggleAction(sendResponse);};
-    if (msg == 'getActionState') {return getActionState(sendResponse);};
-    if (msg == 'getActionState') {return getActionState(sendResponse);};
-    if (msg == 'saveCurrentTabs') {return saveCurrentTabs(sendResponse);};
-    if (msg == 'getTabMetadata') {return getTabMetadata(sendResponse);}
+    if (msg.msg == 'showTabList') {return showTabList();};
+    if (msg.msg == 'toggleAction') {return toggleAction(sendResponse);};
+    if (msg.msg == 'getActionState') {return getActionState(sendResponse);};
+    if (msg.msg == 'getActionState') {return getActionState(sendResponse);};
+    if (msg.msg == 'saveCurrentTabs') {return saveCurrentTabs(sendResponse);};
+    if (msg.msg == 'getTabMetadata') {return getTabMetadata(sendResponse);}
+    if (msg.msg == 'deleteData') {return deleteData(sendResponse);}
+    if (msg.msg == 'openAndDeleteATab') {return openAndDeleteATab(msg.payload);}
 });
 
 
@@ -124,21 +126,92 @@ const loadTabsFromLocal = (key, sendResponse) => {
     });
 }
 
+
+    try{
+    }catch(e){
+        console.log("some error of this sort: ")
+        console.log(e)
+    }
+
+
 const saveCurrentTabs = (sendResponse) => {
-    chrome.tabs.query({currentWindow: true}).then(result=>{
-        sendResponse(result);
-        chrome.storage.local.set({'tabs': result});
-        console.log("saved tabs:")
-        console.log(result)
-    }); 
+    const tabs = 'tabs';
+
+    chrome.storage.local.get(tabs, (rcvd)=>{
+        chrome.tabs.query({currentWindow: true}).then(result=>{
+            sendResponse(result);  // save tabs to storage
+
+            try{
+                rcvd.tabs.push(result);
+            }catch(e){
+                console.log('some error of this sort: ');
+                console.log(e);
+                rcvd.tabs = [];
+                rcvd.tabs.push(result);
+            }
+            console.log({received: rcvd});
+
+            chrome.storage.local.set({tabs: rcvd.tabs});  // save tabs to storage
+            return result;
+        }).then(result=>{
+            console.log("newly saved tabs:");
+            console.log(result);
+
+            // remove all tabs that were previously saved
+            for (tab of result) {
+                chrome.tabs.remove(tab.id);
+            }
+
+            return result;
+        });
+    });
+
     return true;
 }
 
 const getTabMetadata = (sendResponse) => {
     chrome.storage.local.get('tabs', (result) => {
-        console.log('got: ')
-        console.log(result)
         sendResponse(result.tabs);
     });
     return true;
 }
+
+
+const deleteData = (sendResponse) => {
+    chrome.storage.local.set({tabs: []});  // save tabs to storage
+    chrome.storage.local.get('tabs', (result) => {
+        sendResponse(result.tabs);
+    });
+    return true;
+}
+
+const openAndDeleteATab = (payload) => {
+    const tabs = 'tabs';
+
+    chrome.storage.local.get(tabs, (rcvd)=>{
+        chrome.tabs.query({currentWindow: true}).then(result=>{
+            // console.log({received: rcvd});
+            console.log({payload: payload});
+
+            tabToOpen = rcvd.tabs[payload.index[0]][payload.index[1]];
+            if (tabToOpen.id == payload.tabID){
+                console.log({id:tabToOpen.id, title:tabToOpen.title});
+                // chrome.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
+                chrome.tabs.create({url: tabToOpen.url, active:false});
+                tabToOpen = rcvd.tabs[payload.index[0]].splice(payload.index[1],1)
+                if (rcvd.tabs[payload.index[0]].length == 0){rcvd.tabs.splice(payload.index[0],1)}
+            }else{
+                console.log('mismatch')
+                console.log({idToOpen:payload.tabID, idFromSavedData:tabToOpen.id , title:tabToOpen.title});
+            }
+
+            return rcvd.tabs;
+        }).then(tabs=>{
+            chrome.storage.local.set({tabs: tabs});  // save tabs to storage
+        });
+    });
+
+    return true;
+}
+
+
