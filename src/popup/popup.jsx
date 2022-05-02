@@ -14,6 +14,18 @@ function toggleAction() {
     );
 }
 
+function saveCurrentTabs () {
+    console.log('trying to save tabs:');
+    chrome.runtime.sendMessage(
+        'saveCurrentTabs',
+        // callback
+        (tabs) => {
+            console.log('saving tabs:');
+            console.log(tabs);
+        }
+    );
+}
+
 
 class Popup extends React.Component {
   componentDidMount(){
@@ -23,11 +35,13 @@ class Popup extends React.Component {
     );
     document.getElementById('showTabList').addEventListener('click', showTabList);
     document.getElementById('toggleAction').addEventListener('click', toggleAction);
+    document.getElementById('saveCurrentTabs').addEventListener('click', saveCurrentTabs);
   }
   render() {
     return (
       <div className="Popup">
         <button id="showTabList">showTabList</button>
+        <button id="saveCurrentTabs">saveCurrentTabs</button>
         <button id="toggleAction">enable</button>
       </div>
     );

@@ -46,6 +46,9 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg == 'showTabList') {return showTabList();};
     if (msg == 'toggleAction') {return toggleAction(sendResponse);};
     if (msg == 'getActionState') {return getActionState(sendResponse);};
+    if (msg == 'getActionState') {return getActionState(sendResponse);};
+    if (msg == 'saveCurrentTabs') {return saveCurrentTabs(sendResponse);};
+    if (msg == 'getTabMetadata') {return getTabMetadata(sendResponse);}
 });
 
 
@@ -105,4 +108,37 @@ function enablePopup() {
     });
 
     chrome.action.setPopup({popup: "popup/popup.html"});
+}
+
+
+const saveTabsToLocal = (key) => {
+    chrome.tabs.query({currentWindow: true}).then(result=>{
+        console.log(result);
+        chrome.storage.local.set({key: result});
+    }); 
+}
+
+const loadTabsFromLocal = (key, sendResponse) => {
+    chrome.storage.local.get(key, (value)=>{
+        sendResponse(value);
+    });
+}
+
+const saveCurrentTabs = (sendResponse) => {
+    chrome.tabs.query({currentWindow: true}).then(result=>{
+        sendResponse(result);
+        chrome.storage.local.set({'tabs': result});
+        console.log("saved tabs:")
+        console.log(result)
+    }); 
+    return true;
+}
+
+const getTabMetadata = (sendResponse) => {
+    chrome.storage.local.get('tabs', (result) => {
+        console.log('got: ')
+        console.log(result)
+        sendResponse(result.tabs);
+    });
+    return true;
 }
