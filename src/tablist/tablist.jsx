@@ -122,7 +122,6 @@ function TablistList () {
         setTabList(temp);
     };
 
-    const liii = [[11,12],[21,22]];
 
     return(
         <div className="TablistList" id="tablist-list">
@@ -148,10 +147,6 @@ function TablistList () {
         </div>
     );
 }
-                            //<button id={"close-li-"+i+'-'+j} key={"close-li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>x</button>
-                            //<button id={"span-li-"+i+'-'+j} key={"span-li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
-                            //    {subitem.id}: <b>{subitem.title}</b><br/>{subitem.url}
-                            //</button>
 
 
 class Tablist extends React.Component {
