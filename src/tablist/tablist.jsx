@@ -2,6 +2,7 @@ import * as React from 'react';
 // import * as ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { useState, useEffect } from "react";
+import styles from '../style.css';
 
 // import * as t from '../tabs';
 // import styled from 'styled-components';
@@ -67,11 +68,13 @@ function IExportTabs (props) {
 
     if (isVisible){return (
         <div>
-            <hr/>
-            <textarea id="jsonArea" style={{width:'100%', height:'75%'}}>would love to replace this with codemirror</textarea>
+            <div className="divider"/>
+            <textarea className="textarea textarea-bordered w-full h-2/3" id="jsonArea"
+                defaultValue="would love to replace this with codemirror">
+            </textarea>
             <br/>
-            <button id="tabJsonDone">done</button>
-            <button id="tabJsonCancel">cancel</button>
+            <button className="btn btn-sm" id="tabJsonDone">done</button>
+            <button className="btn btn-sm" id="tabJsonCancel">cancel</button>
         </div>
     );};
 
@@ -172,29 +175,33 @@ function TablistList (props) {
         setTabList(temp);
     };
 
+    //
+                //<table className="table table-compact table-fixed w-full" style={{display: 'inline-table', verticalAlign: 'middle', wordBreak: 'break-all'}}><tbody>
 
     return(
-        <div className="TablistList" id="tablist-list">
-        <ul id="tablistlist-ul">{
-            (tabList.length > 0) && tabList.map((item, i) => {return(
-                <li key={'tablist-'+i}>
-                {'tablist-'+i}
-                <ul id={'tablist-'+i}>{
-                    (item.length > 0) && (typeof item.map === 'function') && item.map((subitem,j) => {return (
-                        <li id={"li-"+i+'-'+j} key={"li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
-                            <table style={{display: 'inline-table', verticalAlign: 'middle'}}><tbody>
-                                <tr>
-                                    <td id={"close-li-"+i+'-'+j}>[x]</td>
-                                    <td nowrap="wrap">{subitem.id}: <b>{subitem.title}</b><br/>{subitem.url}</td>
-                                </tr>
-                            </tbody></table>
-                        </li>
-                    )})
-                }</ul>
-                </li>
+      <div className="TablistList break-all max-w-full" id="tablist-list">
+      <ul id="tablistlist-ul">{
+        (tabList.length > 0) && tabList.map((item, i) => {return(
+          <li key={'tablist-'+i}>
+          {'tablist-'+i}
+          <ul id={'tablist-'+i}>{
+            (item.length > 0) && (typeof item.map === 'function') && item.map((subitem,j) => {return (
+              <li id={"li-"+i+'-'+j} key={"li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
+                <table className="table table-compact table-auto w-full"><tbody>
+                  <tr className="hover break-all">
+                    <td className="w-6" id={"close-li-"+i+'-'+j}>[x]</td>
+                    <td className="w-max break-all text-xs whitespace-pre-wrap space-x-0">
+                      {subitem.id}: <b>{subitem.title}</b><p className="break-all">{subitem.url}</p>
+                    </td>
+                  </tr>
+                </tbody></table>
+              </li>
             )})
-        }</ul>
-        </div>
+          }</ul>
+          </li>
+        )})
+      }</ul>
+      </div>
     );
 }
 
@@ -235,16 +242,16 @@ class Tablist extends React.Component {
     render() {
         return (
             <div className="Tablist">
-                <div id="actionStatus"></div>
-                <button id="toggleAction">enable</button>
-                <button id="export">export</button>
+                <div className="text-lg" id="actionStatus"></div>
+                <button className="btn btn-sm" id="toggleAction">enable</button>
+                <button className="btn btn-sm" id="export">Edit</button>
 
                 <IExportTabs isVisible={this.state.showIExport} hideMe={this.hideit} tabData={this.state.tabData} doneFunc={this.doneFunc}/>
 
-                <hr/>
+                <div className="divider"/>
                 <TablistList tabListGen={this.state.tabListGen}/>
-                <hr/>
-                <button id="deleteData">Delete All Data</button>
+                <div className="divider"/>
+                <button className="btn btn-sm" id="deleteData">Delete All Data</button>
             </div>
         );
     }

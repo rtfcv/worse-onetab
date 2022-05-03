@@ -39,10 +39,13 @@ class Popup extends React.Component {
   }
   render() {
     return (
-      <div className="Popup">
-        <button id="showTabList">showTabList</button>
-        <button id="saveCurrentTabs">saveCurrentTabs</button>
-        <button id="toggleAction">enable</button>
+      <div className="card">
+      <h2 className="p-2 text-center text-lg">worse-onetab</h2>
+      <div className="Popup p-2">
+        <button className="btn btn-sm w-full whitespace-nowrap" id="showTabList">Show Tab List</button>
+        <button className="btn btn-sm w-full whitespace-nowrap" id="saveCurrentTabs">Save Current Tabs</button>
+        <button className="btn btn-sm w-full whitespace-nowrap" id="toggleAction">enable</button>
+      </div>
       </div>
     );
   }
