@@ -6,6 +6,7 @@ import styles from '../style.css';
 
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json'
+import { vim, Vim } from "@replit/codemirror-vim";
 
 
 // import * as t from '../tabs';
@@ -43,7 +44,10 @@ function IExportTabs (props) {
     const [done, setDone] = useState(false);
     const [initialValue, setInitialValue] = useState("");
     const text = useRef("");
-    //var tmp = {edit:""};
+    const cmRef = useRef();
+
+    //for debug
+    const [edit, setEdit] = useState("");
 
 
     useEffect(() => {
@@ -51,7 +55,7 @@ function IExportTabs (props) {
         if (isVisible){
             const thisDoneFunc = ()=>{
                 try{
-                    console.log({edit: text.current});
+                    console.log({edit: text.current, same:(text.current==cmRef.current.value), cmRef: cmRef.current.value});
                     const tabData = JSON.parse(text.current);
                     return props.doneFunc(tabData);
                 }catch(e){
@@ -72,26 +76,38 @@ function IExportTabs (props) {
         return ()=>{for (const f of cleanList){f();}};
     }, [props]);
 
+    // //for debugging
+    // useEffect(() => {
+    //     try{
+    //     console.log(cmRef.current.editor.getValue()); // how do I do this?
+    //     }catch(e){
+    //         console.log({e:e, editor:cmRef.current});
+    //     }
+    // }, [edit]);
+
     if (isVisible){return (
         <div>
             <div className="divider"/>
             <div className="flex justify-center h-2/3">
 
                 <CodeMirror
+                  ref={cmRef}
+                  className={"flex place-content-center w-full"}
                   value={initialValue}
-                  height="400px"
-                  width="1200px"
+                  height="90%"
+                  width="90%"
                   theme="dark"
-                  extensions={[json()]}
+                  extensions={[vim(),json()]}
+                  options={{keyMap:"vim"/*Doesn't work. why*/}}
                   onChange={(value, viewUpdate) => {
-                      text.current = value;
+                      text.current = value; setEdit(value);
                       console.log({val:value});
                   }}
                 />
 
 
             </div>
-            <div className="flex justify-center">
+            <div className="flex place-content-center">
                 <button className="btn btn-sm" id="tabJsonDone">done</button>
                 <button className="btn btn-sm" id="tabJsonCancel">cancel</button>
             </div>
