@@ -10,6 +10,8 @@
   "author": "rtfcv",
   "license": "MIT",
   "dependencies": {
+    "@codemirror/lang-json": "^0.20.0",
+    "@uiw/react-codemirror": "^4.7.0",
     "daisyui": "^2.14.3",
     "react": "^18.1.0",
     "react-daisyui": "^2.0.1",

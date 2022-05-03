@@ -1,8 +1,12 @@
 import * as React from 'react';
 // import * as ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from '../style.css';
+
+import CodeMirror from '@uiw/react-codemirror';
+import { json } from '@codemirror/lang-json'
+
 
 // import * as t from '../tabs';
 // import styled from 'styled-components';
@@ -36,17 +40,20 @@ function IExportTabs (props) {
      * View for Exporting and Importing tabs
      */
     const isVisible = props.isVisible;
+    const [done, setDone] = useState(false);
+    const [initialValue, setInitialValue] = useState("");
+    const text = useRef("");
+    //var tmp = {edit:""};
+
 
     useEffect(() => {
         let cleanList = [];
         if (isVisible){
             const thisDoneFunc = ()=>{
-                // do integrity check in the second part
-                //const tabData = JSON.parse(document.getElementById('jsonArea').value, data=>data);
-                
                 try{
-                const tabData = JSON.parse(document.getElementById('jsonArea').value);
-                return props.doneFunc(tabData);
+                    console.log({edit: text.current});
+                    const tabData = JSON.parse(text.current);
+                    return props.doneFunc(tabData);
                 }catch(e){
                     window.alert(e);
                 };
@@ -58,10 +65,9 @@ function IExportTabs (props) {
 
             const tjc = document.getElementById('tabJsonCancel');
             cleanList.push(()=>{tjc.removeEventListener('click', props.hideMe)});
-            tjc.addEventListener('click', props.hideMe, {once: true});
+            tjc.addEventListener('click', props.hideMe);
 
-            const area = document.getElementById('jsonArea');
-            area.value = props.tabData;
+            setInitialValue(props.tabData);
         };
         return ()=>{for (const f of cleanList){f();}};
     }, [props]);
@@ -69,12 +75,27 @@ function IExportTabs (props) {
     if (isVisible){return (
         <div>
             <div className="divider"/>
-            <textarea className="textarea textarea-bordered w-full h-2/3" id="jsonArea"
-                defaultValue="would love to replace this with codemirror">
-            </textarea>
+            <div className="flex justify-center h-2/3">
+
+                <CodeMirror
+                  value={initialValue}
+                  height="400px"
+                  width="1200px"
+                  theme="dark"
+                  extensions={[json()]}
+                  onChange={(value, viewUpdate) => {
+                      text.current = value;
+                      console.log({val:value});
+                  }}
+                />
+
+
+            </div>
+            <div className="flex justify-center">
+                <button className="btn btn-sm" id="tabJsonDone">done</button>
+                <button className="btn btn-sm" id="tabJsonCancel">cancel</button>
+            </div>
             <br/>
-            <button className="btn btn-sm" id="tabJsonDone">done</button>
-            <button className="btn btn-sm" id="tabJsonCancel">cancel</button>
         </div>
     );};
 
@@ -181,7 +202,7 @@ function TablistList (props) {
     return(
       <div className="TablistList break-all max-w-full" id="tablist-list">
       <ul id="tablistlist-ul">{
-        (tabList.length > 0) && tabList.map((item, i) => {return(
+        (tabList.length > 0) && (typeof tabList.map === 'function') && tabList.map((item, i) => {return(
           <li key={'tablist-'+i}>
           {'tablist-'+i}
           <ul id={'tablist-'+i}>{
@@ -242,7 +263,7 @@ class Tablist extends React.Component {
     render() {
         return (
             <div className="Tablist">
-                <div className="text-lg" id="actionStatus"></div>
+                <span className="text-lg" id="actionStatus"></span>
                 <button className="btn btn-sm" id="toggleAction">enable</button>
                 <button className="btn btn-sm" id="export">Edit</button>
 
