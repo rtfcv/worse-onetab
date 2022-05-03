@@ -1,3 +1,9 @@
+// begin initialization ////////////////////////////////////////
+((initialization)=>{
+    console.log('starting_serviceWorker')
+})("");
+
+//// add context Menus
 try{
     chrome.contextMenus.create({
         id: "showTabList",
@@ -19,7 +25,12 @@ try{
     console.log(e)
 }
 
+//// read settings
+// readConfigData((config)=>{console.log(config);});
 
+
+//// assign callback functions
+////// contextMenus
 chrome.contextMenus.onClicked.addListener((args)=>{
     if(args.menuItemId == 'showTabList') {
         showTabList();
@@ -29,12 +40,13 @@ chrome.contextMenus.onClicked.addListener((args)=>{
     };
 })
 
-
+////// actionButton
 chrome.action.onClicked.addListener((tab)=>{showTabList();}) // only works for Mv3
 
-
+////// Messages
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg.msg == 'showTabList') {return showTabList();};
+    if (msg.msg == 'showOptions') {return showOptions();};
 
     console.log({log:"sendResponce received", msg:msg, type: typeof sendResponse})
     console.assert(typeof sendResponse === 'function')
@@ -47,12 +59,29 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg.msg == 'deleteData') {return deleteData(sendResponse);}
     if (msg.msg == 'openAndDeleteATab') {return openAndDeleteATab(msg.payload, sendResponse);}
     if (msg.msg == 'deleteATab') {return deleteATab(msg.payload, sendResponse);}
+
+    // config comes back as first argument
+    if (msg.msg == 'readConfigData') {return readConfigData(sendResponse);}
+    //payload should be dictionary of config
+    if (msg.msg == 'saveConfigData') {return saveConfigData(msg.payload, sendResponse);} // overrides previous data
 });
+// END Initialization ////////////////////////////////////////
 
 
+
+
+// Function DEFINITIONS
 function showTabList() {
     chrome.tabs.create({
         url: chrome.runtime.getURL('tablist/tablist.html'),
+        pinned: true
+    }, ()=>{});
+    return true;
+}
+
+function showOptions() {
+    chrome.tabs.create({
+        url: chrome.runtime.getURL('options/options.html'),
         pinned: true
     }, ()=>{});
     return true;
@@ -109,7 +138,7 @@ function enablePopup() {
 }
 
 
-const saveTabsToLocal = (key) => {
+function saveTabsToLocal(key) {
     /**
      * is this thing EVEN USED?
      * */
@@ -119,7 +148,7 @@ const saveTabsToLocal = (key) => {
     }); 
 }
 
-const loadTabsFromLocal = (key, sendResponse) => {
+function loadTabsFromLocal(key, sendResponse) {
     /**
      * is this thing EVEN USED?
      * */
@@ -129,14 +158,7 @@ const loadTabsFromLocal = (key, sendResponse) => {
 }
 
 
-    try{
-    }catch(e){
-        console.log("some error of this sort: ")
-        console.log(e)
-    }
-
-
-const saveCurrentTabs = (sendResponse) => {
+function saveCurrentTabs(sendResponse) {
     const tabs = 'tabs';
 
     chrome.storage.local.get(tabs, (rcvd)=>{
@@ -172,7 +194,7 @@ const saveCurrentTabs = (sendResponse) => {
 }
 
 
-const saveTabMetadata = (payload, sendResponse) => {
+function saveTabMetadata(payload, sendResponse) {
     /**
      * WARNING:
      * this function overrides everything belonging to tabs
@@ -186,7 +208,7 @@ const saveTabMetadata = (payload, sendResponse) => {
 }
 
 
-const getTabMetadata = (sendResponse) => {
+function getTabMetadata(sendResponse) {
     chrome.storage.local.get('tabs', (result) => {
         sendResponse(result.tabs);
     });
@@ -194,7 +216,7 @@ const getTabMetadata = (sendResponse) => {
 }
 
 
-const deleteData = (sendResponse) => {
+function deleteData(sendResponse) {
     chrome.storage.local.set({tabs: []});  // save tabs to storage
     chrome.storage.local.get('tabs', (result) => {
         sendResponse(result.tabs);
@@ -202,7 +224,7 @@ const deleteData = (sendResponse) => {
     return true;
 }
 
-const openAndDeleteATab = (payload, updateTabLists) => {
+function openAndDeleteATab(payload, updateTabLists) {
     const tabs = 'tabs';
 
     chrome.storage.local.get(tabs, (rcvd)=>{
@@ -228,6 +250,39 @@ const openAndDeleteATab = (payload, updateTabLists) => {
         }).then(tabs=>{
             return chrome.storage.local.set({tabs: tabs});  // save tabs to storage
         }).then(result=>{updateTabLists();}); // call the updater to update the state of the caller
+    });
+
+    return true;
+}
+
+function sanitizeConfigMap(input) {
+    const tCheck = (targetVariable, type, defaultValue)=>{
+        return (typeof targetVariable === type) ? targetVariable : defaultValue;
+    };
+
+    var config = {};
+    config.theme = tCheck(input.theme, 'string', 'dark');
+    config.editMode = tCheck(input.editMode, 'string', 'vim');
+
+    return config;
+}
+
+function readConfigData(callbackFunc) {
+    chrome.storage.local.get('config', (result) => {
+        // DO FORMAT CHECK HERE
+        callbackFunc(sanitizeConfigMap(result.config));
+    });
+    return true;
+}
+
+function saveConfigData(config, callbackFunc) {
+    /**
+     * WARNING:
+     * this function overrides everything belonging to config
+     * */
+    chrome.storage.local.set({config: config});  // save tabs to storage
+    chrome.storage.local.get('config', (config) => {
+        callbackFunc(config);
     });
 
     return true;

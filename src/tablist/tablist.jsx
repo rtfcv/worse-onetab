@@ -11,27 +11,10 @@ import { vim, Vim } from "@replit/codemirror-vim";
 
 // import * as t from '../tabs';
 // import styled from 'styled-components';
-
-function updateStatus(status) {
-      if (status == 'disable') {
-          console.log('was enabled')
-          document.getElementById('toggleAction').textContent = status;
-          document.getElementById('actionStatus').textContent = 'popup is enabled';
-      } else {
-          console.log('was disabled')
-          document.getElementById('toggleAction').textContent = status;
-          document.getElementById('actionStatus').textContent = 'popup is disabled';
-      };
-}
-
-function toggleAction() {
-    chrome.runtime.sendMessage({msg: 'toggleAction'}, (status)=>{updateStatus(status);});
-}
-
 function deleteData() {
     if(window.confirm('Do you want to delete all data?')){
         console.log('dataDelete');
-        chrome.runtime.sendMessage({msg:'deleteData'}, (status)=>{updateStatus(status);});
+        chrome.runtime.sendMessage({msg:'deleteData'}, (status)=>{console.log({log:'deleted', stat:status});});
     };
 }
 
@@ -44,10 +27,7 @@ function IExportTabs (props) {
     const [done, setDone] = useState(false);
     const [initialValue, setInitialValue] = useState("");
     const text = useRef("");
-    const cmRef = useRef();
-
-    //for debug
-    const [edit, setEdit] = useState("");
+    const cmRef = useRef(); // don't have too much use now
 
 
     useEffect(() => {
@@ -76,15 +56,6 @@ function IExportTabs (props) {
         return ()=>{for (const f of cleanList){f();}};
     }, [props]);
 
-    // //for debugging
-    // useEffect(() => {
-    //     try{
-    //     console.log(cmRef.current.editor.getValue()); // how do I do this?
-    //     }catch(e){
-    //         console.log({e:e, editor:cmRef.current});
-    //     }
-    // }, [edit]);
-
     if (isVisible){return (
         <div>
             <div className="divider"/>
@@ -100,7 +71,7 @@ function IExportTabs (props) {
                   extensions={[vim(),json()]}
                   options={{keyMap:"vim"/*Doesn't work. why*/}}
                   onChange={(value, viewUpdate) => {
-                      text.current = value; setEdit(value);
+                      text.current = value;
                       console.log({val:value});
                   }}
                 />
@@ -166,6 +137,9 @@ function TablistList (props) {
                 const cTabTr = cTabTbody.children[0];
                 const cTabElement = cTabTr.children; // should be [x button, tabData] (td, td)
 
+                const closeButton = cTabElement[0].children[0];
+                const tabButton   = cTabElement[1];
+
                 // callback function for a list element
                 const openThisTab = ()=>{
                     // ccc is the li containing table of tab data and button
@@ -191,10 +165,10 @@ function TablistList (props) {
                 };
 
                 // add event listener function and clean list for removing this later
-                cleanList.push(()=>{cTabElement[1].removeEventListener('click', openThisTab)});
-                cleanList.push(()=>{cTabElement[0].removeEventListener('click', deleteThisTab)});
-                cTabElement[1].addEventListener('click', openThisTab, {once: true});
-                cTabElement[0].addEventListener('click', deleteThisTab, {once: true});
+                cleanList.push(()=>{tabButton.removeEventListener('click', openThisTab)});
+                cleanList.push(()=>{closeButton.removeEventListener('click', deleteThisTab)});
+                tabButton.addEventListener('click', openThisTab, {once: true});
+                closeButton.addEventListener('click', deleteThisTab, {once: true});
             }
         }
 
@@ -226,7 +200,7 @@ function TablistList (props) {
               <li id={"li-"+i+'-'+j} key={"li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
                 <table className="table table-compact table-auto w-full"><tbody>
                   <tr className="hover break-all">
-                    <td className="w-6" id={"close-li-"+i+'-'+j}>[x]</td>
+                    <td className="w-6" id={"close-li-"+i+'-'+j}><button className="btn btn-xs btn-circle btn-outline normal-case">X</button></td>
                     <td className="w-max break-all text-xs whitespace-pre-wrap space-x-0">
                       {subitem.id}: <b>{subitem.title}</b><p className="break-all">{subitem.url}</p>
                     </td>
@@ -243,6 +217,7 @@ function TablistList (props) {
 }
 
 
+// Pseudo root of the page
 class Tablist extends React.Component {
     constructor(props) {
         super(props);
@@ -255,23 +230,32 @@ class Tablist extends React.Component {
             console.log(["stateChange",this.state.tabListGen])
             this.hideit();
         };
+
+        // apply config here
+        chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
+            console.log(config);
+            document.documentElement.setAttribute("data-theme", config.theme); // can set theme here
+            document.documentElement.setAttribute('config', JSON.stringify(config));
+        });
     }
 
 
     componentDidMount(){
+
         const exportData = ()=>{
             this.setState({showIExport : true});
             chrome.runtime.sendMessage({msg:'getTabMetadata'}, (result)=>{
                 this.setState({tabData : JSON.stringify(result, ['id','title','url'], 2)});
             });
         };
+        const openOptions=()=>{chrome.runtime.sendMessage({msg:'showOptions'});};
+
         const hideit = ()=>{this.setState({showIExport : false});}
 
         document.getElementById('export').addEventListener('click', exportData);
+        document.getElementById('openOptions').addEventListener('click', openOptions);
 
         document.title = "OneTab - Tab Lists";
-        chrome.runtime.sendMessage({msg: 'getActionState'}, (status)=>{updateStatus(status);});
-        document.getElementById('toggleAction').addEventListener('click', toggleAction);
         document.getElementById('deleteData').addEventListener('click', deleteData);
 
     }
@@ -279,8 +263,7 @@ class Tablist extends React.Component {
     render() {
         return (
             <div className="Tablist">
-                <span className="text-lg" id="actionStatus"></span>
-                <button className="btn btn-sm" id="toggleAction">enable</button>
+                <button className="btn btn-sm" id="openOptions">Options</button>
                 <button className="btn btn-sm" id="export">Edit</button>
 
                 <IExportTabs isVisible={this.state.showIExport} hideMe={this.hideit} tabData={this.state.tabData} doneFunc={this.doneFunc}/>

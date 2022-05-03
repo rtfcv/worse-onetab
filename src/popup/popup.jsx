@@ -28,11 +28,25 @@ function saveCurrentTabs () {
 
 
 class Popup extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {tabData : ""};
+
+    // apply config here
+    chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
+      console.log(config);
+      document.documentElement.setAttribute("data-theme", config.theme); // can set theme here
+      document.documentElement.setAttribute('config', JSON.stringify(config));
+    });
+  }
+
   componentDidMount(){
     chrome.runtime.sendMessage(
         {msg:'getActionState'},
         (status) => {document.getElementById('toggleAction').textContent = status;}
     );
+    const showOptions=()=>{chrome.runtime.sendMessage({msg:'showOptions'});};
+    document.getElementById('showOptions').addEventListener('click', showOptions);
     document.getElementById('showTabList').addEventListener('click', showTabList);
     document.getElementById('toggleAction').addEventListener('click', toggleAction);
     document.getElementById('saveCurrentTabs').addEventListener('click', saveCurrentTabs);
@@ -44,6 +58,7 @@ class Popup extends React.Component {
       <div className="Popup p-2">
         <button className="btn btn-sm w-full whitespace-nowrap" id="showTabList">Show Tab List</button>
         <button className="btn btn-sm w-full whitespace-nowrap" id="saveCurrentTabs">Save Current Tabs</button>
+        <button className="btn btn-sm w-full whitespace-nowrap" id="showOptions">Show Options</button>
         <button className="btn btn-sm w-full whitespace-nowrap" id="toggleAction">enable</button>
       </div>
       </div>
