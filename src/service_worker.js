@@ -1,17 +1,17 @@
 try{
     chrome.contextMenus.create({
-        id: "showPopUp",
-        title: "showPopUp",
+        id: "showTabList",
+        title: "showTabList",
         contexts: ["action"],
     });
     chrome.contextMenus.create({
-        id: "toggleAction",
-        title: "toggleAction",
+        id: "enablePopup",
+        title: "enablePopup",
         contexts: ["action"],
     });
     chrome.contextMenus.create({
         id: "showOptions",
-        title: "showOptions",
+        title: "showOptions(not implemented)",
         contexts: ["action"],
     });
 }catch(e){
@@ -21,34 +21,29 @@ try{
 
 
 chrome.contextMenus.onClicked.addListener((args)=>{
-    if(args.menuItemId == 'showPopUp') {
-        console.log("showPopUp");
+    if(args.menuItemId == 'showTabList') {
+        showTabList();
     };
-    if(args.menuItemId == 'toggleAction') {
+    if(args.menuItemId == 'enablePopup') {
         enablePopup();
     };
 })
 
 
-chrome.action.onClicked.addListener(handleBrowserActionClicked) // only works for Mv3
-
-function handleBrowserActionClicked(tab) {
-    showTabList();
-}
-
-
-function handleWindowCreated(window) {
-    console.log('done');
-}
+chrome.action.onClicked.addListener((tab)=>{showTabList();}) // only works for Mv3
 
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg.msg == 'showTabList') {return showTabList();};
+
+    console.log({log:"sendResponce received", msg:msg, type: typeof sendResponse})
+    console.assert(typeof sendResponse === 'function')
     if (msg.msg == 'toggleAction') {return toggleAction(sendResponse);};
     if (msg.msg == 'getActionState') {return getActionState(sendResponse);};
     if (msg.msg == 'getActionState') {return getActionState(sendResponse);};
     if (msg.msg == 'saveCurrentTabs') {return saveCurrentTabs(sendResponse);};
     if (msg.msg == 'getTabMetadata') {return getTabMetadata(sendResponse);}
+    if (msg.msg == 'saveTabMetadata') {return saveTabMetadata(msg.payload, sendResponse);} // overrides previous data
     if (msg.msg == 'deleteData') {return deleteData(sendResponse);}
     if (msg.msg == 'openAndDeleteATab') {return openAndDeleteATab(msg.payload, sendResponse);}
     if (msg.msg == 'deleteATab') {return deleteATab(msg.payload, sendResponse);}
@@ -56,11 +51,10 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
 
 function showTabList() {
-    const opts = {
-        url: chrome.runtime.getURL('tablist/tablist.html')
-    };
-    //chrome.windows.create(opts, handleWindowCreated);
-    chrome.tabs.create(opts, handleWindowCreated);
+    chrome.tabs.create({
+        url: chrome.runtime.getURL('tablist/tablist.html'),
+        pinned: true
+    }, ()=>{});
     return true;
 }
 
@@ -116,6 +110,9 @@ function enablePopup() {
 
 
 const saveTabsToLocal = (key) => {
+    /**
+     * is this thing EVEN USED?
+     * */
     chrome.tabs.query({currentWindow: true}).then(result=>{
         console.log(result);
         chrome.storage.local.set({key: result});
@@ -123,6 +120,9 @@ const saveTabsToLocal = (key) => {
 }
 
 const loadTabsFromLocal = (key, sendResponse) => {
+    /**
+     * is this thing EVEN USED?
+     * */
     chrome.storage.local.get(key, (value)=>{
         sendResponse(value);
     });
@@ -170,6 +170,21 @@ const saveCurrentTabs = (sendResponse) => {
 
     return true;
 }
+
+
+const saveTabMetadata = (payload, sendResponse) => {
+    /**
+     * WARNING:
+     * this function overrides everything belonging to tabs
+     * */
+    console.log(["new tabs",payload.tabs]);
+    chrome.storage.local.set({tabs: payload.tabs});  // save tabs to storage
+    chrome.storage.local.get('tabs', (result) => {
+        sendResponse(result.tabs);
+    });
+    return true;
+}
+
 
 const getTabMetadata = (sendResponse) => {
     chrome.storage.local.get('tabs', (result) => {

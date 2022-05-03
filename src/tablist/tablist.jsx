@@ -30,7 +30,57 @@ function deleteData() {
 }
 
 
-function TablistList () {
+function IExportTabs (props) {
+    /**
+     * View for Exporting and Importing tabs
+     */
+    const isVisible = props.isVisible;
+
+    useEffect(() => {
+        let cleanList = [];
+        if (isVisible){
+            const thisDoneFunc = ()=>{
+                // do integrity check in the second part
+                //const tabData = JSON.parse(document.getElementById('jsonArea').value, data=>data);
+                
+                try{
+                const tabData = JSON.parse(document.getElementById('jsonArea').value);
+                return props.doneFunc(tabData);
+                }catch(e){
+                    window.alert(e);
+                };
+            }
+
+            const tjd = document.getElementById('tabJsonDone');
+            cleanList.push(()=>{tjd.removeEventListener('click', thisDoneFunc)});
+            tjd.addEventListener('click', thisDoneFunc);
+
+            const tjc = document.getElementById('tabJsonCancel');
+            cleanList.push(()=>{tjc.removeEventListener('click', props.hideMe)});
+            tjc.addEventListener('click', props.hideMe, {once: true});
+
+            const area = document.getElementById('jsonArea');
+            area.value = props.tabData;
+        };
+        return ()=>{for (const f of cleanList){f();}};
+    }, [props]);
+
+    if (isVisible){return (
+        <div>
+            <hr/>
+            <textarea id="jsonArea" style={{width:'100%', height:'75%'}}>would love to replace this with codemirror</textarea>
+            <br/>
+            <button id="tabJsonDone">done</button>
+            <button id="tabJsonCancel">cancel</button>
+        </div>
+    );};
+
+    // if not visible
+    return (<span></span>);
+}
+
+
+function TablistList (props) {
     const [tabList, setTabList] = useState([]);
     const [dummy, setDummy] = useState(0);
 
@@ -52,7 +102,7 @@ function TablistList () {
 
     useEffect(() => {
         updateTabList();
-    }, []); // need the second component to be empty to do this only when this first renders
+    }, [props.tabListGen]); // need the second component to be empty to do this only when this first renders
 
     useEffect(() => {
         // list of cleanupFunctions
@@ -130,7 +180,7 @@ function TablistList () {
                 <li key={'tablist-'+i}>
                 {'tablist-'+i}
                 <ul id={'tablist-'+i}>{
-                    (item.length > 0) && item.map((subitem,j) => {return (
+                    (item.length > 0) && (typeof item.map === 'function') && item.map((subitem,j) => {return (
                         <li id={"li-"+i+'-'+j} key={"li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
                             <table style={{display: 'inline-table', verticalAlign: 'middle'}}><tbody>
                                 <tr>
@@ -150,11 +200,36 @@ function TablistList () {
 
 
 class Tablist extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {showIExport : false, tabListGen: 0, tabData : ""};
+        this.hideit = ()=>{ this.setState({showIExport : false});};
+
+        this.doneFunc = (tabs)=>{
+            chrome.runtime.sendMessage({msg:'saveTabMetadata', payload:{tabs:tabs}}, (result)=>{console.log('overrided storage.tabs')});
+            this.setState({tabListGen:1+this.state.tabListGen}); // change generation of tab list generation
+            console.log(["stateChange",this.state.tabListGen])
+            this.hideit();
+        };
+    }
+
+
     componentDidMount(){
+        const exportData = ()=>{
+            this.setState({showIExport : true});
+            chrome.runtime.sendMessage({msg:'getTabMetadata'}, (result)=>{
+                this.setState({tabData : JSON.stringify(result, ['id','title','url'], 2)});
+            });
+        };
+        const hideit = ()=>{this.setState({showIExport : false});}
+
+        document.getElementById('export').addEventListener('click', exportData);
+
         document.title = "OneTab - Tab Lists";
         chrome.runtime.sendMessage({msg: 'getActionState'}, (status)=>{updateStatus(status);});
         document.getElementById('toggleAction').addEventListener('click', toggleAction);
         document.getElementById('deleteData').addEventListener('click', deleteData);
+
     }
 
     render() {
@@ -162,8 +237,12 @@ class Tablist extends React.Component {
             <div className="Tablist">
                 <div id="actionStatus"></div>
                 <button id="toggleAction">enable</button>
+                <button id="export">export</button>
+
+                <IExportTabs isVisible={this.state.showIExport} hideMe={this.hideit} tabData={this.state.tabData} doneFunc={this.doneFunc}/>
+
                 <hr/>
-                <TablistList />
+                <TablistList tabListGen={this.state.tabListGen}/>
                 <hr/>
                 <button id="deleteData">Delete All Data</button>
             </div>
