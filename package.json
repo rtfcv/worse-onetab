@@ -4,8 +4,9 @@
   "description": "minimalist clone of one-tab",
   "main": "index.js",
   "scripts": {
-    "build": "tailwindcss -i ./src/style.css  -o ./dist/style.css && webpack",
-    "prod-build": "./build-scripts/prod-build",
+    "build": "tailwindcss -i ./src/style.css -o ./dist/style.css && webpack",
+    "prod-build": "NODE_ENV=production tailwindcss -i ./src/style.css -o ./dist/style.css && webpack --mode=production",
+    "prod-build-win": "set NODE_ENV=production && tailwindcss -i ./src/style.css -o ./dist/style.css && webpack --mode=production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "rtfcv",

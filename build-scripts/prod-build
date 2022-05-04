@@ -1,5 +1,0 @@
-#!/bin/sh
-# for POSIX-ish OSs
-export NODE_ENV=production;
-tailwindcss -i ./src/style.css  -o ./dist/style.css;
-webpack --mode=production;
