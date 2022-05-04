@@ -11,3 +11,5 @@ add codemirror
 hide text area
 invisible text area mirrors codemirror content
 
+remove wrap-all from higher tier elements
+and mix them with wrap words
