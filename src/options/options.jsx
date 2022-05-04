@@ -37,9 +37,9 @@ function OptionsEditor(props) {
         // function for submitting edit
         const thisDoneFunc = ()=>{
             try{
-                const configData = JSON.parse(text.current);
-                // do something with configData
+                const configData = JSON.parse(text.current); // this is where things are likely to fail
                 chrome.runtime.sendMessage({msg:'saveConfigData', payload:configData}, (result)=>{console.log({savedConfig: result})});
+                chrome.runtime.sendMessage({msg:'reloadConfigs'}, (resp)=>{});
             }catch(e){
                 window.alert(e);
             };
@@ -47,9 +47,7 @@ function OptionsEditor(props) {
 
         // function for resetting text area
         const resetFunc = ()=>{
-            if(window.confirm("revert every change?")){
-                doReset();
-            }
+            if(window.confirm("revert every change?")){doReset();}
         }
 
         const doneButton = document.getElementById('configJsonDone');

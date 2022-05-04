@@ -23,7 +23,7 @@ function saveCurrentTabs(sendResponse) {
 
     chrome.storage.local.get(tabs, (rcvd)=>{
         chrome.tabs.query({currentWindow: true}).then(result=>{
-            sendResponse(result);  // save tabs to storage
+            (typeof sendResponse === 'function') && sendResponse(result);  // save tabs to storage
 
             try{
                 rcvd.tabs.push(result);
@@ -41,7 +41,7 @@ function saveCurrentTabs(sendResponse) {
             console.log("newly saved tabs:");
             console.log(result);
 
-            // remove all tabs that were previously saved
+            // remove all tabs that were just saved
             for (const tab of result) {
                 chrome.tabs.remove(tab.id);
             }
