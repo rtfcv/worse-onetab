@@ -2,11 +2,9 @@
 
 ## high priority
 
-- export function
-- import function
-- delete function
 - load group function
-- style
+- action button settings
+- right click popup?
 
 revert json editor
 add codemirror

@@ -68,7 +68,7 @@ function OptionsEditor(props) {
       <div id="config-editor-root">
 
           <div className="flex justify-center content-center h-fit">
-            <h1 className={"w-fit h-fit text-xl"}>Options</h1>
+            <h1 className={"p-2 text-center w-full h-fit text-xl"}>Options</h1>
           </div>
           <div className="divider"/>
           <div className="flex place-content-center h-2/3">
