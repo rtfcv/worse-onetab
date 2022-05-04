@@ -78,7 +78,7 @@ function IExportTabs (props) {
 
 
       </div>
-      <div className="flex place-content-center pt-6">
+      <div className="flex place-content-center pt-6 gap-2">
         <button className="btn btn-sm" id="tabJsonDone">done</button>
         <button className="btn btn-sm" id="tabJsonCancel">cancel</button>
       </div>
@@ -262,8 +262,10 @@ class Tablist extends React.Component {
   render() {
     return (
       <div className="Tablist">
-        <div className="flex flex-nowrap pt-6 justify-around">
+        <div className={"pt-6"}/>
+        <div className="flex flex-nowrap justify-around">
           <button className="btn btn-sm" id="openOptions">Options</button>
+          <div className="prose w-fit"><h1>List of Stored Tabs</h1></div>
           <button className="btn btn-sm" id="export">Edit</button>
         </div>
 
@@ -274,9 +276,10 @@ class Tablist extends React.Component {
         <TablistList tabListGen={this.state.tabListGen}/>
 
         <div className="divider"/>
-        <div className="flex flex-nowrap pb-6 justify-around">
+        <div className="flex flex-nowrap justify-around">
           <button className="btn btn-sm" id="deleteData">Delete All Data</button>
         </div>
+        <div className={"pt-6"}/>
       </div>
     );
   }

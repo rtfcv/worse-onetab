@@ -64,9 +64,9 @@ function OptionsEditor(props) {
 
     return (
       <div id="config-editor-root">
-
-          <div className="flex justify-center content-center h-fit">
-            <h1 className={"p-2 text-center w-full h-fit text-xl"}>Options</h1>
+          <div className={"pt-6"}/>
+          <div className={"prose text-center max-w-full"}>
+            <h2 className={"w-full"}>Options</h2>
           </div>
           <div className="divider"/>
           <div className="flex place-content-center h-2/3">
@@ -86,7 +86,7 @@ function OptionsEditor(props) {
               />
           </div>
           <div className="divider"/>
-          <div className="flex place-content-center">
+          <div className="flex place-content-center gap-2">
               <button className="btn btn-sm" id="configJsonDone">done</button>
               <button className="btn btn-sm" id="configJsonCancel">cancel</button>
           </div>
