@@ -242,8 +242,22 @@ class Tablist extends React.Component {
         if(m.msg === 'reloadConfigs'){
           console.log('tablist: messg_rcvd: \n'+JSON.stringify([m, s, sR],null,2));
           applyConfig();
+        }else if(m.msg === 'tabDataChanged'){
+          console.log('tablist: messg_rcvd: \n'+JSON.stringify([m, s, sR],null,2));
+          this.setState({tabListGen:1+this.state.tabListGen}); // change generation of tab list generation
+          // What to do if Editor was Open???
+          if(this.state.showIExport){window.alert("Tab Data Changed!!!");};
+
+          sR();
+          /**
+           * ^^ to avoid bug
+           * see https://bugs.chromium.org/p/chromium/issues/detail?id=1304272
+           */
         };
+      return true;
     });
+
+
   }
 
 

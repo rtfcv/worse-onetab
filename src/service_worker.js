@@ -82,7 +82,16 @@ chrome.runtime.onMessage.addListener(function (msgMap, sender, sendResponse) {
     switch (msgMap.msg){
         case 'showTabList': return showTabList();
         case 'showOptions': return showOptions();
-        case 'reloadConfigs': return reloadConfigs();
+
+
+        /**
+         * see https://bugs.chromium.org/p/chromium/issues/detail?id=1304272
+         */
+        // case 'tabDataChanged': return true; // this should be implemented in in pages
+        // case 'reloadConfigs': return reloadConfigs();
+        case 'tabDataChanged': sendResponse(); return true; // this should be implemented in in pages
+        case 'reloadConfigs':  sendResponse(); return reloadConfigs();
+
     }
 
     console.assert(typeof sendResponse === 'function')

@@ -46,6 +46,9 @@ function saveCurrentTabs(sendResponse) {
                 chrome.tabs.remove(tab.id);
             }
 
+            // tell the world the tab has been saved
+            chrome.runtime.sendMessage({msg:'tabDataChanged'});
+
             return result;
         });
     });
@@ -60,10 +63,13 @@ function saveTabMetadata(payload, sendResponse) {
      * this function overrides everything belonging to tabs
      * */
     console.log(["new tabs",payload.tabs]);
-    chrome.storage.local.set({tabs: payload.tabs});  // save tabs to storage
-    chrome.storage.local.get('tabs', (result) => {
-        sendResponse(result.tabs);
-    });
+    chrome.storage.local.set({tabs: payload.tabs}).then(()=>{
+        // tell the world the tab has been saved
+        chrome.runtime.sendMessage({msg:'tabDataChanged'});
+        chrome.storage.local.get('tabs', (result) => {
+            sendResponse(result.tabs);
+        });
+    });  // save tabs to storage
     return true;
 }
 

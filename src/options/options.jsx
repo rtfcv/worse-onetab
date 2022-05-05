@@ -117,11 +117,18 @@ class Options extends React.Component {
         });}
         this.updateConfig();
 
+
         // below cannot listen to myself(this page)
         chrome.runtime.onMessage.addListener(function(m, s, sR){
             if(m.msg === 'reloadConfigs'){
                 console.log('tablist: messg_rcvd: \n'+JSON.stringify([m, s, sR],null,2));
                 this.updateConfig();
+
+                sR();
+                /**
+                 * ^^ to avoid bug
+                 * see https://bugs.chromium.org/p/chromium/issues/detail?id=1304272
+                 */
             };
         });
     }
