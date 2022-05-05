@@ -5,8 +5,8 @@ import {
 } from './configFunc';
 
 import {
-    saveTabsToLocal,
-    loadTabsFromLocal,
+    // saveTabsToLocal,
+    // loadTabsFromLocal,
     saveCurrentTabs,
     saveTabMetadata,
     getTabMetadata,
@@ -18,7 +18,7 @@ import {
     toggleAction,
     getActionState,
     enablePopup,
-    disablePopup,
+    // disablePopup,
 } from './actionButtonFunc'
 
 import {
@@ -27,37 +27,27 @@ import {
 } from './openView'
 
 // begin initialization ////////////////////////////////////////
-((initialization)=>{
-    console.log('starting_serviceWorker')
-})("");
-
-
 //// add context Menus
-try{
-    chrome.contextMenus.create({
-        id: "showTabList",
-        title: "Show Tab List",
-        contexts: ["action"],
-    });
-    chrome.contextMenus.create({
-        id: "showOptions",
-        title: "Show Options",
-        contexts: ["action"],
-    });
-    chrome.contextMenus.create({
-        id: "storeTabsOnCurrentWindow",
-        title: "Store Tabs on Current Window",
-        contexts: ["action"],
-    });
-    chrome.contextMenus.create({
-        id: "enablePopup",
-        title: "enablePopup",
-        contexts: ["action"],
-    });
-}catch(e){
-    console.log("some error")
-    console.log(e)
-}
+chrome.contextMenus.create({
+    id: "showTabList",
+    title: "Show Tab List",
+    contexts: ["action"],
+}, ()=>{console.log(chrome.runtime.lastError)}); //accessing chrome.runtime.lastErrro suppresses error
+chrome.contextMenus.create({
+    id: "showOptions",
+    title: "Show Options",
+    contexts: ["action"],
+}, ()=>{console.log(chrome.runtime.lastError)});
+chrome.contextMenus.create({
+    id: "storeTabsOnCurrentWindow",
+    title: "Store Tabs on Current Window",
+    contexts: ["action"],
+}, ()=>{console.log(chrome.runtime.lastError)});
+chrome.contextMenus.create({
+    id: "enablePopup",
+    title: "enablePopup",
+    contexts: ["action"],
+}, ()=>{console.log(chrome.runtime.lastError)});
 
 
 //// read settings
