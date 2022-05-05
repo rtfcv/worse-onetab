@@ -119,19 +119,33 @@ function openAndDeleteATab(payload, updateTabLists) {
                         // we want to discard this tab here.
                         // should the tabID be correct,
                         if (tabId != tab.id){return;}
-                        chrome.tabs.discard(tab.id);
 
+                        // /* this
+                        chrome.tabs.discard(tab.id);
                         // remove this callback function
                         chrome.tabs.onUpdated.removeListener(doDiscard);
-                        console.info(["discarded", tabId, changeInfo, tabInfo, doDiscard]);
+                        //*/
+
+                        /* OR this
+                        chrome.scripting.executeScript({
+                            target: {tabId: tabId},
+                            func: ()=>{document.title = '_'+tabToOpen.title+'_';},
+                        },() => {
+                            chrome.tabs.discard(tab.id);
+                            // remove this callback function
+                            chrome.tabs.onUpdated.removeListener(doDiscard);
+                        });
+                        // */
+
+                        console.info(["discarding", tabId, changeInfo, tabInfo, doDiscard]);
                     };
                     chrome.tabs.onUpdated.addListener(doDiscard);
                 });
             }
 
+            // delete that tab that we did or did not open
             rcvd.tabs[payload.index[0]].splice(payload.index[1],1); // delete that tab we opened
             if (rcvd.tabs[payload.index[0]].length == 0){rcvd.tabs.splice(payload.index[0],1)}
-
             return rcvd.tabs;
         }).then(tabs=>{
             return chrome.storage.local.set({tabs: tabs});  // save tabs to storage
