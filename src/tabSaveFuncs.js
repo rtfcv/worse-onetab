@@ -94,21 +94,43 @@ function openAndDeleteATab(payload, updateTabLists) {
     chrome.storage.local.get(tabs, (rcvd)=>{
         chrome.tabs.query({currentWindow: true}).then(result=>{
             // console.log({received: rcvd});
-            console.log({payload: payload});
-
+            console.info({payload: payload});
             const tabToOpen = rcvd.tabs[payload.index[0]][payload.index[1]];
-            if (tabToOpen.id == payload.tabid){
-                console.log({id:tabToOpen.id, title:tabToOpen.title});
-                if(payload.doOpen){
-                    // chrome.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
-                    chrome.tabs.create({url: tabToOpen.url, active:false});
-                }
-                rcvd.tabs[payload.index[0]].splice(payload.index[1],1); // delete that tab we opened
-                if (rcvd.tabs[payload.index[0]].length == 0){rcvd.tabs.splice(payload.index[0],1)}
-            }else{
+
+            // check data integrety
+            if (tabToOpen.id != payload.tabid){
+                // oops
                 console.log('mismatch')
                 console.log({idToOpen:payload.tabid, idFromSavedData:tabToOpen.id , title:tabToOpen.title});
+                return rcvd.tabs;
             }
+
+            // data integrity was alright
+            console.debug({id:tabToOpen.id, title:tabToOpen.title});
+
+            if(payload.doOpen){
+                // chrome.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
+                chrome.tabs.create({url:tabToOpen.url , active:false}).then((tab)=>{
+                    // when tab is opened
+                    // We would like it to be discarded
+                    const doDiscard=(tabId, changeInfo, tabInfo)=>{
+                        // when tab changes state undefined->loading->...->completed
+                        // first state change is to loading.
+                        // we want to discard this tab here.
+                        // should the tabID be correct,
+                        if (tabId != tab.id){return;}
+                        chrome.tabs.discard(tab.id);
+
+                        // remove this callback function
+                        chrome.tabs.onUpdated.removeListener(doDiscard);
+                        console.info(["discarded", tabId, changeInfo, tabInfo, doDiscard]);
+                    };
+                    chrome.tabs.onUpdated.addListener(doDiscard);
+                });
+            }
+
+            rcvd.tabs[payload.index[0]].splice(payload.index[1],1); // delete that tab we opened
+            if (rcvd.tabs[payload.index[0]].length == 0){rcvd.tabs.splice(payload.index[0],1)}
 
             return rcvd.tabs;
         }).then(tabs=>{
