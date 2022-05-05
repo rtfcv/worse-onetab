@@ -1,13 +1,13 @@
 import {
-    toggleAction,
-    getActionState,
+    // toggleAction,
+    // getActionState,
     enablePopup,
     disablePopup,
 } from './actionButtonFunc'
 
 import {
     showTabList,
-    showOptions,
+    // showOptions,
 } from './openView'
 
 
@@ -62,11 +62,16 @@ function saveConfigData(config, callbackFunc) {
      * WARNING:
      * this function overrides everything belonging to config
      * */
-    chrome.storage.local.set({config: config});  // save tabs to storage
-    chrome.storage.local.get('config', (config) => {
-        callbackFunc(config);
-    });
+    // DO FORMAT CHECK HERE
+    const cfgData = (sanitizeConfigMap(config));
 
+    // save config to storage
+    chrome.storage.local.set({config: cfgData}).then(()=>{
+        // chrome.runtime.sendMessage({msg:'cfgUpdated'});  // use reloadConfigs from outside instead
+        chrome.storage.local.get('config', (config) => {
+            callbackFunc(config);
+        });
+    });
     return true;
 }
 

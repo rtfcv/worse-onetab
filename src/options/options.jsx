@@ -38,8 +38,14 @@ function OptionsEditor(props) {
         const thisDoneFunc = ()=>{
             try{
                 const configData = JSON.parse(text.current); // this is where things are likely to fail
-                chrome.runtime.sendMessage({msg:'saveConfigData', payload:configData}, (result)=>{console.log({savedConfig: result})});
-                chrome.runtime.sendMessage({msg:'reloadConfigs'}, (resp)=>{});
+
+                chrome.runtime.sendMessage({msg:'saveConfigData', payload:configData}, (result)=>{
+                    console.log("savedConfig: " + JSON.stringify(result));
+                    chrome.runtime.sendMessage({msg:'reloadConfigs'}, (_)=>{});
+                    // I cannot listen to message sent by myself(this page)
+                    props.updateConfig();
+                });
+
             }catch(e){
                 window.alert(e);
             };
@@ -104,10 +110,19 @@ class Options extends React.Component {
         this.state = {tabData : ""};
 
         // apply config here
-        chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
+        this.updateConfig = ()=>{chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
             console.log(config);
             document.documentElement.setAttribute("data-theme", config.theme); // can set theme here
             document.documentElement.setAttribute('config', JSON.stringify(config));
+        });}
+        this.updateConfig();
+
+        // below cannot listen to myself(this page)
+        chrome.runtime.onMessage.addListener(function(m, s, sR){
+            if(m.msg === 'reloadConfigs'){
+                console.log('tablist: messg_rcvd: \n'+JSON.stringify([m, s, sR],null,2));
+                this.updateConfig();
+            };
         });
     }
     componentDidMount(){
@@ -117,7 +132,7 @@ class Options extends React.Component {
   render() {
     return (
       <div className="OptionsEditor">
-        <OptionsEditor />
+        <OptionsEditor updateConfig={this.updateConfig} />
       </div>
     );
   }

@@ -231,10 +231,18 @@ class Tablist extends React.Component {
     };
 
     // apply config here
-    chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
-      console.log(config);
-      document.documentElement.setAttribute("data-theme", config.theme); // can set theme here
-      document.documentElement.setAttribute('config', JSON.stringify(config));
+    const applyConfig = ()=>{chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
+        console.log(config);
+        document.documentElement.setAttribute("data-theme", config.theme); // can set theme here
+        document.documentElement.setAttribute('config', JSON.stringify(config));
+    });}
+    applyConfig();
+
+    chrome.runtime.onMessage.addListener((m, s, sR)=>{
+        if(m.msg === 'reloadConfigs'){
+          console.log('tablist: messg_rcvd: \n'+JSON.stringify([m, s, sR],null,2));
+          applyConfig();
+        };
     });
   }
 
