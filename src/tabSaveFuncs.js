@@ -35,21 +35,19 @@ function saveCurrentTabs(sendResponse) {
             }
             console.log({received: rcvd});
 
-            chrome.storage.local.set({tabs: rcvd.tabs});  // save tabs to storage
-            return result;
-        }).then(result=>{
-            console.log("newly saved tabs:");
-            console.log(result);
+            // save tabs to storage
+            chrome.storage.local.set({tabs: rcvd.tabs}).then(()=>{
+                console.log("newly saved tabs:");
+                console.log(result);
 
-            // remove all tabs that were just saved
-            for (const tab of result) {
-                chrome.tabs.remove(tab.id);
-            }
-
-            // tell the world the tab has been saved
-            chrome.runtime.sendMessage({msg:'tabDataChanged'});
-
-            return result;
+                // remove all tabs that were just saved
+                for (const tab of result) {
+                    chrome.tabs.remove(tab.id);
+                }
+            }).then(()=>{
+                // tell the world the tab has been saved
+                chrome.runtime.sendMessage({msg:'tabDataChanged'});
+            });
         });
     });
 
@@ -115,7 +113,10 @@ function openAndDeleteATab(payload, updateTabLists) {
             return rcvd.tabs;
         }).then(tabs=>{
             return chrome.storage.local.set({tabs: tabs});  // save tabs to storage
-        }).then(result=>{updateTabLists();}); // call the updater to update the state of the caller
+        }).then(result=>{
+            chrome.runtime.sendMessage({msg:'tabDataChanged'});
+            updateTabLists();
+        }); // call the updater to update the state of the caller
     });
 
     return true;
