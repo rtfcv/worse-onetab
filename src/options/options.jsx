@@ -2,11 +2,11 @@ import * as React from 'react';
 // import * as ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { useState, useEffect, useRef } from "react";
-import styles from '../style.css';
+// import styles from '../style.css';
 
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json'
-import { vim, Vim } from "@replit/codemirror-vim";
+import { vim /*, Vim*/ } from "@replit/codemirror-vim";
 
 
 
@@ -14,7 +14,7 @@ function OptionsEditor(props) {
     /**
      * View for Exporting and Importing tabs
      */
-    const [done, setDone] = useState(false);
+    // const [done, setDone] = useState(false);
     const [initialValue, setInitialValue] = useState("");
     const text = useRef("");
     const cmRef = useRef(); // don't have too much use now
@@ -92,9 +92,6 @@ function OptionsEditor(props) {
           </div>
       </div>
     );
-
-    // if not visible
-    return (<span></span>);
 }
 
 

@@ -2,11 +2,11 @@ import * as React from 'react';
 // import * as ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { useState, useEffect, useRef } from "react";
-import styles from '../style.css';
+// import styles from '../style.css';
 
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json'
-import { vim, Vim } from "@replit/codemirror-vim";
+import { vim/*, Vim*/ } from "@replit/codemirror-vim";
 
 
 // import * as t from '../tabs';
@@ -24,7 +24,7 @@ function IExportTabs (props) {
    * View for Exporting and Importing tabs
    */
   const isVisible = props.isVisible;
-  const [done, setDone] = useState(false);
+  // const [done, setDone] = useState(false);
   const [initialValue, setInitialValue] = useState("");
   const text = useRef("");
   const cmRef = useRef(); // don't have too much use now
@@ -99,7 +99,7 @@ function TablistList (props) {
     chrome.runtime.sendMessage({msg:'getTabMetadata'},
       (result)=>{
         try{
-          let tlLen = result.length;
+          // let tlLen = result.length;
           setTabList(result);
           setDummy(dummy+1);
         }catch(e){
@@ -181,16 +181,15 @@ function TablistList (props) {
   }, [tabList]); // need the second component to do this only when this first renders
 
 
-  const deleteItem = (index) => {
-    let temp = tabList.filter((item, i) => i !== index);
-    setTabList(temp);
-  };
+  // const deleteItem = (index) => {
+  //   let temp = tabList.filter((item, i) => i !== index);
+  //   setTabList(temp);
+  // };
 
-  //
   //<table className="table table-compact table-fixed w-full" style={{display: 'inline-table', verticalAlign: 'middle', wordBreak: 'break-all'}}><tbody>
 
   return(
-    <div className="TablistList break-all max-w-full" id="tablist-list">
+    <div className="TablistList max-w-full" id="tablist-list">
     <ul id="tablistlist-ul">{
       (tabList.length > 0) && (typeof tabList.map === 'function') && tabList.map((item, i) => {return(
         <li key={'tablist-'+i}>
@@ -198,10 +197,10 @@ function TablistList (props) {
         <ul id={'tablist-'+i}>{
           (item.length > 0) && (typeof item.map === 'function') && item.map((subitem,j) => {return (
             <li id={"li-"+i+'-'+j} key={"li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
-              <table className="table table-compact table-auto w-full"><tbody>
-                <tr className="hover break-all">
-                  <td className="w-6" id={"close-li-"+i+'-'+j}><button className="btn btn-xs btn-circle btn-outline normal-case">X</button></td>
-                  <td className="w-max break-all text-xs whitespace-pre-wrap space-x-0">
+              <table className="table table-compact table-fixed w-full"><tbody>
+                <tr className="hover">
+                  <td className="w-8" id={"close-li-"+i+'-'+j}><button className="btn btn-xs btn-circle btn-outline normal-case">X</button></td>
+                  <td className="w-max text-xs whitespace-normal truncate hover:text-clip break-words">
                     {subitem.id}: <b>{subitem.title}</b><p className="break-all">{subitem.url}</p>
                   </td>
                 </tr>
@@ -249,7 +248,7 @@ class Tablist extends React.Component {
     };
     const openOptions=()=>{chrome.runtime.sendMessage({msg:'showOptions'});};
 
-    const hideit = ()=>{this.setState({showIExport : false});}
+    // const hideit = ()=>{this.setState({showIExport : false});}
 
     document.getElementById('export').addEventListener('click', exportData);
     document.getElementById('openOptions').addEventListener('click', openOptions);
