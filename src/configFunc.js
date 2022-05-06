@@ -16,28 +16,33 @@ import {
 } from './tabSaveFuncs'
 
 function sanitizeConfigMap(input) {
-    const tCheck = (targetVariable, type, defaultValue)=>{
-        return (typeof targetVariable === type) ? targetVariable : defaultValue;
+    const tCheck = (targetVariable, defaultValue)=>{
+        return (typeof targetVariable === typeof defaultValue) ? targetVariable : defaultValue;
     };
 
     var config = {};
 
-    config.theme = tCheck(input.theme, 'string', 'dark');
-      /** theme: str
-       * accepts: dark, light, business, luxury, black, ... and much more
-       */
+    /** theme: str
+     * accepts: dark, light, business, luxury, black, ... and much more
+     */
+    config.theme = tCheck(input.theme, 'dark');
 
-    config.editMode = tCheck(input.editMode, 'string', 'vim');
-      /** editMode: string
-       * accepts: vim
-       * has no effect right now
-       */
+    /** editMode: string
+     * accepts: vim
+     * has no effect right now
+     */
+    config.editMode = tCheck(input.editMode, 'vim');
 
-    config.actionButton = tCheck(input.actionButton, 'string', 'popUp');
-      /** theme: editMode
-       * accepts: popUp, tabList, storeTabsOnCurrentWindow
-       * has no effect right now
-       */
+    /** theme: string
+     * accepts: "popUp", "tabList", "storeTabsOnCurrentWindow"
+     */
+    config.actionButton = tCheck(input.actionButton, 'popUp');
+
+    /** restoreTabsDiscarded: boolean
+     * accepts: true, false
+     * has no effect right now
+     */
+    config.restoreTabsDiscarded = tCheck(input.restoreTabsDiscarded, true);
 
     /**
      * UPCOMING:

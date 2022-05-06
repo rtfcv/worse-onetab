@@ -26,8 +26,10 @@ function OptionsEditor(props) {
         // read config and set it as initial value
         const doReset = ()=>{
             console.log('resetting editor to saved config');
+            setInitialValue( '' );
+
             chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
-                setInitialValue( JSON.stringify(config, null, 2) ); //was expecting this to reset the CodeMirror even after edit but it doesn't
+                setInitialValue( JSON.stringify(config, null, 2) );
                 console.log(config);
             });
         }
@@ -122,7 +124,7 @@ class Options extends React.Component {
         chrome.runtime.onMessage.addListener(function(m, s, sR){
             if(m.msg === 'reloadConfigs'){
                 console.log('tablist: messg_rcvd: \n'+JSON.stringify([m, s, sR],null,2));
-                this.updateConfig();
+                this.updateConfig(); //Error in event handler: TypeError: this.updateConfig is not a function ... why
 
                 sR();
                 /**

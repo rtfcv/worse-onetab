@@ -114,6 +114,7 @@ function openAndDeleteATab(payload, updateTabLists) {
                     // when tab is opened
                     // We would like it to be discarded
                     const doDiscard=(tabId, changeInfo, tabInfo)=>{
+                        if (payload.restoreTabsDiscarded != true){return};
                         // when tab changes state undefined->loading->...->completed
                         // first state change is to loading.
                         // we want to discard this tab here.

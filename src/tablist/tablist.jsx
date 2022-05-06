@@ -63,6 +63,7 @@ function IExportTabs (props) {
 
         <CodeMirror
           ref={cmRef}
+          autoFocus={true}
           className={"flex place-content-center w-full"}
           value={initialValue}
           height="100%"
@@ -151,7 +152,16 @@ function TablistList (props) {
 
           // open page url: request service worker to open and pop the item from the list
           // need to pass updateTabList to update
-          chrome.runtime.sendMessage({msg:'openAndDeleteATab', payload:{index: index, tabid: tabid, doOpen: true}}, updateTabList);
+          chrome.runtime.sendMessage(
+            {
+                msg:'openAndDeleteATab',
+                payload:{
+                    index: index,
+                    tabid: tabid,
+                    doOpen: true,
+                    restoreTabsDiscarded: props.restoreTabsDiscarded,
+                }
+            }, updateTabList);
         };
 
         // callback function closing list element
@@ -220,11 +230,11 @@ function TablistList (props) {
 class Tablist extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {showIExport : false, tabListGen: 0, tabData : ""};
+    this.state = {showIExport : false, tabListGen: 0, tabData : "", restoreTabsDiscarded: true};
     this.hideit = ()=>{ this.setState({showIExport : false});};
 
     this.doneFunc = (tabs)=>{
-      chrome.runtime.sendMessage({msg:'saveTabMetadata', payload:{tabs:tabs}}, (result)=>{console.log('overrided storage.tabs')});
+      chrome.runtime.sendMessage({msg:'saveTabMetadata', payload:{tabs:tabs}}, ()=>{console.log('overrided storage.tabs')});
       this.setState({tabListGen:1+this.state.tabListGen}); // change generation of tab list generation
       console.log(["stateChange",this.state.tabListGen])
       this.hideit();
@@ -232,7 +242,10 @@ class Tablist extends React.Component {
 
     // apply config here
     const applyConfig = ()=>{chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
-        console.log(config);
+        console.info('config is now'+ JSON.stringify(config));
+        this.setState({restoreTabsDiscarded: config.restoreTabsDiscarded});
+        console.info('this.state is now'+ JSON.stringify(this.state)); // this should update TabList prop. and rerender
+
         document.documentElement.setAttribute("data-theme", config.theme); // can set theme here
         document.documentElement.setAttribute('config', JSON.stringify(config));
     });}
@@ -294,7 +307,7 @@ class Tablist extends React.Component {
 
         <div className="divider"/>
 
-        <TablistList tabListGen={this.state.tabListGen}/>
+        <TablistList tabListGen={this.state.tabListGen} restoreTabsDiscarded={this.state.restoreTabsDiscarded} />
 
         <div className="divider"/>
         <div className="flex flex-nowrap justify-around">
