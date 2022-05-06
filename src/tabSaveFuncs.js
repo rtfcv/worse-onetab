@@ -23,22 +23,27 @@ function saveCurrentTabs(sendResponse) {
 
     chrome.storage.local.get(tabs, (rcvd)=>{
         chrome.tabs.query({currentWindow: true}).then(result=>{
-            (typeof sendResponse === 'function') && sendResponse(result);  // save tabs to storage
+            // do something with result
+            (typeof sendResponse === 'function') && sendResponse(result);
 
+            // rcvd.tabs <- tab data in storage
             try{
                 rcvd.tabs.push(result);
+
+                // in the future we may change rcvd.tabs to object
+                // rcvd.tabs[hash] = result as Array<tabdata>;
             }catch(e){
-                console.log('some error of this sort: ');
-                console.log(e);
-                rcvd.tabs = [];
+                console.error('some error of this sort: ');
+                console.error(e);
+                rcvd.tabs = []; // maybe this is too destructive
                 rcvd.tabs.push(result);
             }
-            console.log({received: rcvd});
+            console.info({received: rcvd});
 
             // save tabs to storage
             chrome.storage.local.set({tabs: rcvd.tabs}).then(()=>{
-                console.log("newly saved tabs:");
-                console.log(result);
+                console.info("newly saved tabs:");
+                console.info(result);
 
                 // remove all tabs that were just saved
                 for (const tab of result) {
@@ -90,6 +95,8 @@ function deleteTabData(sendResponse) {
 
 function openAndDeleteATab(payload, updateTabLists) {
     const tabs = 'tabs';
+
+    console.warn('Deprecated! use openAndDeleteTabs instead in Future');
 
     chrome.storage.local.get(tabs, (rcvd)=>{
         chrome.tabs.query({currentWindow: true}).then(result=>{
@@ -160,6 +167,96 @@ function openAndDeleteATab(payload, updateTabLists) {
 }
 
 
+function openAndDeleteTabs(payload, updateTabLists) {
+    const tabs = 'tabs';
+
+    // console.error('delete from source from here');
+    // payload={
+    //   indexList: [1,2,3],
+    //   idList: [[1,1],[2,2],[3,3]],
+    //   doOpen: true,
+    //   restoreTabsDiscarded: props.restoreTabsDiscarded,
+    // };
+    // console.error('delete from source to here');
+
+    chrome.storage.local.get(tabs, (rcvd)=>{
+        chrome.tabs.query({currentWindow: true}).then(result=>{
+            console.debug(result);// this should do nothing
+
+            // loop through idList and indexList
+            const itrList = payload.idList.map((item,i)=>[item, payload.indexList[i]]);
+            for (const pair of itrList) {
+                const id = pair[0];
+                const idx = pair[1];
+                // console.log({received: rcvd});
+                const tabToOpen = rcvd.tabs[idx[0]][idx[1]];
+
+                console.log('about to check',{id:id, idx:idx, tab:tabToOpen, rcvd:rcvd});
+                // check data integrety
+                if (tabToOpen.id != id){
+                    console.warning('mismatch')
+                    console.warning({idToOpen:id, idFromSavedData:tabToOpen.id , title:tabToOpen.title});
+                    continue;
+                }
+
+                // data integrity was alright
+                console.debug({id:tabToOpen.id, title:tabToOpen.title});
+
+                if(payload.doOpen){
+                    // chrome.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
+                    chrome.tabs.create({url:tabToOpen.url , active:false}).then((tab)=>{
+                        // when tab is opened
+                        // We would like it to be discarded
+                        const doDiscard=(tabId, changeInfo, tabInfo)=>{
+                            if (payload.restoreTabsDiscarded != true){return};
+                            // when tab changes state undefined->loading->...->completed
+                            // first state change is to loading.
+                            // we want to discard this tab here.
+                            // should the tabID be correct,
+                            if (tabId != tab.id){return;}
+
+                            // /* this
+                            chrome.tabs.discard(tab.id);
+                            // remove this callback function
+                            chrome.tabs.onUpdated.removeListener(doDiscard);
+                            //*/
+
+                            /* OR this
+                            chrome.scripting.executeScript({
+                                target: {tabId: tabId},
+                                func: ()=>{document.title = '_'+tabToOpen.title+'_';},
+                            },() => {
+                                chrome.tabs.discard(tab.id);
+                                // remove this callback function
+                                chrome.tabs.onUpdated.removeListener(doDiscard);
+                            });
+                            // */
+
+                            console.info(["discarding", tabId, changeInfo, tabInfo, doDiscard]);
+                        };
+                        chrome.tabs.onUpdated.addListener(doDiscard);
+                    });
+                }
+                rcvd.tabs[idx[0]][idx[1]]=null; // mark tab we opened
+            }
+
+            // // delete that tab that we did or did not open
+            rcvd.tabs = rcvd.tabs.map((item)=>item.filter(i=>i))
+            // // if the tabGroup becommes empty, delete it as well
+            rcvd.tabs = rcvd.tabs.filter(i=>i.length>0)
+            return rcvd.tabs;
+        }).then(tabs=>{
+            return chrome.storage.local.set({tabs: tabs});  // save tabs to storage
+        }).then(result=>{
+            chrome.runtime.sendMessage({msg:'tabDataChanged'});
+            updateTabLists();
+        }); // call the updater to update the state of the caller
+    });
+
+    return true;
+}
+
+
 export {
     saveTabsToLocal,
     loadTabsFromLocal,
@@ -168,4 +265,5 @@ export {
     getTabMetadata,
     deleteTabData,
     openAndDeleteATab,
+    openAndDeleteTabs,
 };

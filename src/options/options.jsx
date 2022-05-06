@@ -80,6 +80,7 @@ function OptionsEditor(props) {
           <div className="flex place-content-center h-2/3">
               <CodeMirror
                 ref={cmRef}
+                autoFocus={true}
                 className={"flex justify-center content-center w-full h-full"}
                 value={initialValue}
                 height="100%"

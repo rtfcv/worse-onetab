@@ -12,6 +12,7 @@ import {
     getTabMetadata,
     deleteTabData,
     openAndDeleteATab,
+    openAndDeleteTabs,
 } from './tabSaveFuncs'
 
 import {
@@ -104,6 +105,7 @@ chrome.runtime.onMessage.addListener(function (msgMap, sender, sendResponse) {
         case 'saveTabMetadata':   return saveTabMetadata(msgMap.payload, sendResponse); // overrides previous data
         case 'deleteData':        return deleteTabData(sendResponse);
         case 'openAndDeleteATab': return openAndDeleteATab(msgMap.payload, sendResponse);
+        case 'openAndDeleteTabs': return openAndDeleteTabs(msgMap.payload, sendResponse);
 
         case 'readConfigData': return readConfigData(sendResponse); // config comes back as first argument
         case 'saveConfigData': return saveConfigData(msgMap.payload, sendResponse); // overrides previous data //payload should be dictionary of config

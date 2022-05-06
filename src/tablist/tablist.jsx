@@ -127,12 +127,14 @@ function TablistList (props) {
     // loop through list of tablist
     for (const c of cTabListList){
       const cTabList = c.children // should yield tablist li
-      const cc = cTabList[0]; // get tabList ul from tablist li
+      const cc = cTabList[1]; // get tabList ul from tablist li
       const cTab = cc.children
 
-      // subscribe closing and opening tabGroup here
+      let tabIdxsToDealList = [];
+      let tabIdsToDealList = [];
 
-      // loop through element of tablist li
+      // subscribe closing and opening individual tabs here
+      //// loop through element of tablist li
       for (const ccc of cTab) {
         const cTabTbody = ccc.children[0].children[0];
         const cTabTr = cTabTbody.children[0];
@@ -141,11 +143,18 @@ function TablistList (props) {
         const closeButton = cTabElement[0].children[0];
         const tabButton  = cTabElement[1];
 
+        // ccc is the li containing table of tab data and button
+        const index = ccc.getAttribute('ijloc').split(','); // string 'i,j'
+        const tabid = ccc.getAttribute('tabid');
+
+        tabIdsToDealList.push(tabid);
+        tabIdxsToDealList.push(index);
+
         // callback function for a list element
         const openThisTab = ()=>{
-          // ccc is the li containing table of tab data and button
-          const index = ccc.getAttribute('ijloc').split(','); // string 'i,j'
-          const tabid = ccc.getAttribute('tabid');
+          // // ccc is the li containing table of tab data and button
+          // const index = ccc.getAttribute('ijloc').split(','); // string 'i,j'
+          // const tabid = ccc.getAttribute('tabid');
 
           // log what has been clicked
           console.log({clicked: ccc, id: ccc.id, index: index, tabid: tabid, doOpen: true});
@@ -179,7 +188,46 @@ function TablistList (props) {
         cleanList.push(()=>{closeButton.removeEventListener('click', deleteThisTab)});
         tabButton.addEventListener('click', openThisTab, {once: true});
         closeButton.addEventListener('click', deleteThisTab, {once: true});
+
       }
+
+      // subscribe closing and opening tab groups here
+      // callback for buttons manupilating tablist
+      const deleteTabGroup = ()=>{
+        const tablistkey = c.getAttribute('tablistkey');
+        chrome.runtime.sendMessage({
+          msg:'openAndDeleteTabs',
+          payload:{
+            tablistkey: tablistkey,
+            indexList: tabIdxsToDealList,
+            idList: tabIdsToDealList,
+            doOpen: false
+          }}, updateTabList);
+      };
+
+      const openTabGroup = ()=>{
+        const tablistkey = c.getAttribute('tablistkey');
+        chrome.runtime.sendMessage({
+          msg:'openAndDeleteTabs',
+          payload:{
+            tablistkey: tablistkey,
+            indexList: tabIdxsToDealList,
+            idList: tabIdsToDealList,
+            doOpen: true,
+            restoreTabsDiscarded: props.restoreTabsDiscarded,
+          }}, updateTabList);
+      };
+
+      const cDiv = cTabList[0] // children of div
+      const BtnGrp = cDiv.children[1].children;
+      const cTabListBtn = BtnGrp[0];
+      const oTabListBtn = BtnGrp[1];
+
+      // add event listener function and clean list for removing this later
+      cleanList.push(()=>{cTabListBtn.removeEventListener('click', deleteTabGroup)});
+      cleanList.push(()=>{oTabListBtn.removeEventListener('click', openTabGroup)});
+      cTabListBtn.addEventListener('click', deleteTabGroup, {once: true});
+      oTabListBtn.addEventListener('click', openTabGroup, {once: true});
     }
 
     // returning a cleanup function
@@ -190,37 +238,57 @@ function TablistList (props) {
     };
   }, [tabList]); // need the second component to do this only when this first renders
 
+  // tablist
+  const tablistMapped=(i)=>{
+    return (subitem,j)=>{
+      try{
+        console.debug(subitem.id, subitem.url, subitem.title);
+      }catch(e){
+        subitem = {
+          url: 'error',
+          id: null,
+          title: 'error'
+        }
+      };
+      return (
+        <li id={"li-"+i+'-'+j} key={"li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
+          <table className="table table-compact table-fixed w-full">
+            <tbody>
+              <tr className="hover">
+                <td className="w-8" id={"close-li-"+i+'-'+j}><button className="btn btn-xs btn-circle btn-outline normal-case">X</button></td>
+                <td className="w-max text-xs whitespace-normal truncate hover:text-clip break-words">
+                  <b className="font-extrabold">{subitem.title}</b><p className="break-all">{subitem.url}</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </li>
+      )
+    };
+  };
 
-  // const deleteItem = (index) => {
-  //   let temp = tabList.filter((item, i) => i !== index);
-  //   setTabList(temp);
-  // };
-
-  //<table className="table table-compact table-fixed w-full" style={{display: 'inline-table', verticalAlign: 'middle', wordBreak: 'break-all'}}><tbody>
+  // list of tablist
+  const tablistListMapped=(item, i)=>{return(
+        <li key={'tablist-'+i} tablistkey={i}>
+          <div className="flex mt-4 gap-4 items-center w-full">
+            <span className="text-base font-extrabold h-fit ml-4">{'Tab List '+i}</span>
+            <div className="btn-group">
+              <button className="btn btn-xs" disabled={false}>Close All</button>
+              <button className="btn btn-xs" disabled={false}>Restore All</button>
+            </div>
+            <div className="divider grow"/>
+          </div>
+          <ul id={'tablist-'+i}>
+            {(item.length > 0) && (typeof item.map === 'function') && item.map(tablistMapped(i))}
+          </ul>
+        </li>
+  )};
 
   return(
     <div className="TablistList max-w-full" id="tablist-list">
-    <ul id="tablistlist-ul">{
-      (tabList.length > 0) && (typeof tabList.map === 'function') && tabList.map((item, i) => {return(
-        <li key={'tablist-'+i}>
-        {'tablist-'+i}
-        <ul id={'tablist-'+i}>{
-          (item.length > 0) && (typeof item.map === 'function') && item.map((subitem,j) => {return (
-            <li id={"li-"+i+'-'+j} key={"li-"+i+'-'+j} ijloc={[i,j]} tabid={subitem.id}>
-              <table className="table table-compact table-fixed w-full"><tbody>
-                <tr className="hover">
-                  <td className="w-8" id={"close-li-"+i+'-'+j}><button className="btn btn-xs btn-circle btn-outline normal-case">X</button></td>
-                  <td className="w-max text-xs whitespace-normal truncate hover:text-clip break-words">
-                    {subitem.id}: <b>{subitem.title}</b><p className="break-all">{subitem.url}</p>
-                  </td>
-                </tr>
-              </tbody></table>
-            </li>
-          )})
-        }</ul>
-        </li>
-      )})
-    }</ul>
+      <ul id="tablistlist-ul">
+        {(tabList.length > 0) && (typeof tabList.map === 'function') && tabList.map(tablistListMapped)}
+      </ul>
     </div>
   );
 }
@@ -288,7 +356,7 @@ class Tablist extends React.Component {
     document.getElementById('export').addEventListener('click', exportData);
     document.getElementById('openOptions').addEventListener('click', openOptions);
 
-    document.title = "OneTab - Tab Lists";
+    document.title = "Worse-OneTab - Tab Lists";
     document.getElementById('deleteData').addEventListener('click', deleteData);
   }
 
