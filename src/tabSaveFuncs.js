@@ -79,7 +79,17 @@ function saveTabMetadata(payload, sendResponse) {
 
 function getTabMetadata(sendResponse) {
     chrome.storage.local.get('tabs', (result) => {
-        sendResponse(result.tabs);
+        console.log('storage is: ', result);
+        let output=[];
+        if (result.tabs === null || result.tabs === undefined){
+            output=[];
+        }else if(typeof result.tabs !== typeof []){
+            output=[result.tabs];
+        }else{
+            output=result.tabs;
+        }
+        console.assert(output !== null);
+        sendResponse(output);
     });
     return true;
 }

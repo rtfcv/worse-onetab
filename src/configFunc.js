@@ -16,6 +16,9 @@ import {
 } from './tabSaveFuncs'
 
 function sanitizeConfigMap(input) {
+    if (typeof input === 'undefined'){
+        input = {};
+    }
     const tCheck = (targetVariable, defaultValue)=>{
         return (typeof targetVariable === typeof defaultValue) ? targetVariable : defaultValue;
     };
@@ -28,10 +31,10 @@ function sanitizeConfigMap(input) {
     config.theme = tCheck(input.theme, 'dark');
 
     /** editMode: string
-     * accepts: vim
+     * accepts: 'default', 'vim'
      * has no effect right now
      */
-    config.editMode = tCheck(input.editMode, 'vim');
+    config.editMode = tCheck(input.editMode, 'default');
 
     /** theme: string
      * accepts: "popUp", "tabList", "storeTabsOnCurrentWindow"
@@ -57,6 +60,9 @@ function sanitizeConfigMap(input) {
 function readConfigData(callbackFunc) {
     chrome.storage.local.get('config', (result) => {
         // DO FORMAT CHECK HERE
+        console.log('Reading Config', result);
+        const cleanConfig = sanitizeConfigMap(result.config);
+        console.log(cleanConfig);
         callbackFunc(sanitizeConfigMap(result.config));
     });
     return true;

@@ -3,11 +3,9 @@
   "description": "worse-onetab",
   "version": "0.1",
   "manifest_version": 3,
-  "host_permissions": ["*://*/"],
   "permissions": [
       "contextMenus",
       "storage",
-      "scripting",
       "tabs"
   ],
   "background": {

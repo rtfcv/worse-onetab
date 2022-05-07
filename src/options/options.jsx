@@ -8,7 +8,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json'
 import { vim /*, Vim*/ } from "@replit/codemirror-vim";
 
-
+let editorPlugin = [json()]
 
 function OptionsEditor(props) {
     /**
@@ -86,7 +86,7 @@ function OptionsEditor(props) {
                 height="100%"
                 width="90%"
                 theme="dark"
-                extensions={[vim(),json()]}
+                extensions={editorPlugin}
                 options={{keyMap:"vim"/*Doesn't work. why*/}}
                 onChange={(value, viewUpdate) => {
                     text.current = value;
@@ -154,6 +154,10 @@ class Options extends React.Component {
 chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
   // set theme first and foremost
   document.documentElement.setAttribute("data-theme", config.theme); 
+
+  if (config.editMode === 'vim'){
+    editorPlugin.push(vim());
+  }
 
   const container = document.getElementById('root');
   const root = createRoot(container);

@@ -1,4 +1,5 @@
 const TerserPlugin = require("terser-webpack-plugin")
+const path = require('path');
 
 const common = require('./webpack.config.js');
 
@@ -15,5 +16,6 @@ common.optimization = {
   ],
 };
 common.mode = 'production';
+common.output.path = path.resolve(__dirname, './release')
 
 module.exports = common
