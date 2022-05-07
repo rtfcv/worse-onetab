@@ -270,7 +270,7 @@ function TablistList (props) {
   // list of tablist
   const tablistListMapped=(item, i)=>{return(
         <li key={'tablist-'+i} tablistkey={i}>
-          <div className="flex mt-4 gap-4 items-center w-full">
+          <div className="flex mt-4 gap-4 items-baseline w-full">
             <span className="text-base font-extrabold h-fit ml-4">{'Tab List '+i}</span>
             <div className="btn-group">
               <button className="btn btn-xs" disabled={false}>Close All</button>
@@ -365,7 +365,7 @@ class Tablist extends React.Component {
     return (
       <div className="Tablist">
         <div className={"pt-6"}/>
-        <div className="flex flex-nowrap justify-around">
+        <div className="flex flex-nowrap justify-around items-baseline ">
           <button className="btn btn-sm" id="openOptions">Options</button>
           <div className="prose w-fit"><h1>List of Stored Tabs</h1></div>
           <button className="btn btn-sm" id="export">Edit</button>

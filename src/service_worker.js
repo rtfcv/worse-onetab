@@ -44,11 +44,6 @@ chrome.contextMenus.create({
     title: "Store Tabs on Current Window",
     contexts: ["action"],
 }, ()=>{console.log(chrome.runtime.lastError)});
-chrome.contextMenus.create({
-    id: "enablePopup",
-    title: "enablePopup",
-    contexts: ["action"],
-}, ()=>{console.log(chrome.runtime.lastError)});
 
 
 //// read settings
