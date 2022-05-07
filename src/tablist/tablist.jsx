@@ -314,7 +314,7 @@ class Tablist extends React.Component {
         this.setState({restoreTabsDiscarded: config.restoreTabsDiscarded});
         console.info('this.state is now'+ JSON.stringify(this.state)); // this should update TabList prop. and rerender
 
-        document.documentElement.setAttribute("data-theme", config.theme); // can set theme here
+        document.documentElement.setAttribute("data-theme", config.theme); // set theme here
         document.documentElement.setAttribute('config', JSON.stringify(config));
     });}
     applyConfig();
@@ -388,6 +388,11 @@ class Tablist extends React.Component {
 }
 
 
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(<Tablist />);
+chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
+  // set theme first and foremost
+  document.documentElement.setAttribute("data-theme", config.theme); 
+
+  const container = document.getElementById('root');
+  const root = createRoot(container);
+  root.render(<Tablist />);
+});

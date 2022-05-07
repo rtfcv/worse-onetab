@@ -148,6 +148,14 @@ class Options extends React.Component {
   }
 }
 
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(<Options />);
+
+
+
+chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
+  // set theme first and foremost
+  document.documentElement.setAttribute("data-theme", config.theme); 
+
+  const container = document.getElementById('root');
+  const root = createRoot(container);
+  root.render(<Options />);
+});
