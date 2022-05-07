@@ -370,7 +370,9 @@ class Tablist extends React.Component {
         <div className={"pt-6"}/>
         <div className="flex flex-nowrap justify-around items-baseline ">
           <button className="btn btn-sm" id="openOptions">Options</button>
-          <div className="prose w-fit"><h1>List of Stored Tabs</h1></div>
+          <div className="prose w-fit">
+            <h1>List of Stored Tabs</h1>
+          </div>
           <button className="btn btn-sm" id="export">Edit</button>
         </div>
 
@@ -401,5 +403,9 @@ chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
 
   const container = document.getElementById('root');
   const root = createRoot(container);
-  root.render(<Tablist />);
+  root.render(
+    <div className={'p-6'}>
+      <Tablist />
+    </div>
+  );
 });

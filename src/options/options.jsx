@@ -74,7 +74,7 @@ function OptionsEditor(props) {
       <div id="config-editor-root">
           <div className={"pt-6"}/>
           <div className={"prose text-center max-w-full"}>
-            <h2 className={"w-full"}>Options</h2>
+            <h1 className={"w-full"}>Options</h1>
           </div>
           <div className="divider"/>
           <div className="flex place-content-center h-2/3">
@@ -161,5 +161,9 @@ chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
 
   const container = document.getElementById('root');
   const root = createRoot(container);
-  root.render(<Options />);
+  root.render(
+    <div className="p-6">
+      <Options />
+    </div>
+  );
 });
