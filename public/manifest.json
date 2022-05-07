@@ -2,7 +2,9 @@
   "name": "worse-onetab",
   "description": "worse-onetab",
   "version": "0.1",
+  "icons": {"128": "icons/icon.png" },
   "manifest_version": 3,
+  "license": "",
   "permissions": [
       "contextMenus",
       "storage",
@@ -11,8 +13,12 @@
   "background": {
     "service_worker": "service_worker.js"
   },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
   "action": {
-      "default_popup": "popup/popup.html",
-      "default_title": "Click me to open a new window"
+      "default_icon": {"128": "icons/icon.png" },
+      "default_popup": "popup/popup.html"
   }
 }
