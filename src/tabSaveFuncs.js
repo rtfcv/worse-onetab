@@ -33,8 +33,8 @@ function saveCurrentTabs(sendResponse) {
                 // in the future we may change rcvd.tabs to object
                 // rcvd.tabs[hash] = result as Array<tabdata>;
             }catch(e){
-                console.error('some error of this sort: ');
-                console.error(e);
+                console.error('some error of this sort: ', e);
+                console.error('resetting tab data to: []');
                 rcvd.tabs = []; // maybe this is too destructive
                 rcvd.tabs.push(result);
             }
