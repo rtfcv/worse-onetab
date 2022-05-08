@@ -32,17 +32,17 @@ import {
 chrome.contextMenus.create({
     id: "showTabList",
     title: "Show Tab List",
-    contexts: ["action"],
+    contexts: ["browser_action"],
 }, ()=>{console.log(chrome.runtime.lastError)}); //accessing chrome.runtime.lastErrro suppresses error
 chrome.contextMenus.create({
     id: "showOptions",
     title: "Show Options",
-    contexts: ["action"],
+    contexts: ["browser_action"],
 }, ()=>{console.log(chrome.runtime.lastError)});
 chrome.contextMenus.create({
     id: "storeTabsOnCurrentWindow",
     title: "Store Tabs on Current Window",
-    contexts: ["action"],
+    contexts: ["browser_action"],
 }, ()=>{console.log(chrome.runtime.lastError)});
 
 

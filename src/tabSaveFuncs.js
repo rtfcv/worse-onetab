@@ -2,7 +2,7 @@ function saveTabsToLocal(key) {
     /**
      * is this thing EVEN USED?
      * */
-    chrome.tabs.query({currentWindow: true}).then(result=>{
+    browser.tabs.query({currentWindow: true}).then(result=>{
         console.log(result);
         chrome.storage.local.set({key: result});
     }); 
@@ -21,8 +21,8 @@ function loadTabsFromLocal(key, sendResponse) {
 function saveCurrentTabs(sendResponse) {
     const tabs = 'tabs';
 
-    chrome.storage.local.get(tabs, (rcvd)=>{
-        chrome.tabs.query({currentWindow: true}).then(result=>{
+    browser.storage.local.get(tabs).then((rcvd)=>{
+        browser.tabs.query({currentWindow: true}).then(result=>{
             // do something with result
             (typeof sendResponse === 'function') && sendResponse(result);
 
@@ -41,19 +41,19 @@ function saveCurrentTabs(sendResponse) {
             console.info({received: rcvd});
 
             // save tabs to storage
-            chrome.storage.local.set({tabs: rcvd.tabs}).then(()=>{
+            browser.storage.local.set({tabs: rcvd.tabs}).then(()=>{
                 console.info("newly saved tabs:");
                 console.info(result);
 
                 // remove all tabs that were just saved
                 for (const tab of result) {
-                    chrome.tabs.remove(tab.id);
+                    browser.tabs.remove(tab.id);
                 }
             }).then(()=>{
                 // tell the world the tab has been saved
                 chrome.runtime.sendMessage({msg:'tabDataChanged'});
             });
-        });
+        }, (boo)=>{console.warn('somethingWentWrong at saveCurrentTabs, ', boo);});
     });
 
     return true;
@@ -109,7 +109,7 @@ function openAndDeleteATab(payload, updateTabLists) {
     console.warn('Deprecated! use openAndDeleteTabs instead in Future');
 
     chrome.storage.local.get(tabs, (rcvd)=>{
-        chrome.tabs.query({currentWindow: true}).then(result=>{
+        browser.tabs.query({currentWindow: true}).then(result=>{
             // console.log({received: rcvd});
             console.info({payload: payload});
             const tabToOpen = rcvd.tabs[payload.index[0]][payload.index[1]];
@@ -126,8 +126,8 @@ function openAndDeleteATab(payload, updateTabLists) {
             console.debug({id:tabToOpen.id, title:tabToOpen.title});
 
             if(payload.doOpen){
-                // chrome.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
-                chrome.tabs.create({url:tabToOpen.url , active:false}).then((tab)=>{
+                // browser.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
+                browser.tabs.create({url:tabToOpen.url , active:false}).then((tab)=>{
                     // when tab is opened
                     // We would like it to be discarded
                     const doDiscard=(tabId, changeInfo, tabInfo)=>{
@@ -139,9 +139,9 @@ function openAndDeleteATab(payload, updateTabLists) {
                         if (tabId != tab.id){return;}
 
                         // /* this
-                        chrome.tabs.discard(tab.id);
+                        browser.tabs.discard(tab.id);
                         // remove this callback function
-                        chrome.tabs.onUpdated.removeListener(doDiscard);
+                        browser.tabs.onUpdated.removeListener(doDiscard);
                         //*/
 
                         /* OR this
@@ -149,15 +149,15 @@ function openAndDeleteATab(payload, updateTabLists) {
                             target: {tabId: tabId},
                             func: ()=>{document.title = '_'+tabToOpen.title+'_';},
                         },() => {
-                            chrome.tabs.discard(tab.id);
+                            browser.tabs.discard(tab.id);
                             // remove this callback function
-                            chrome.tabs.onUpdated.removeListener(doDiscard);
+                            browser.tabs.onUpdated.removeListener(doDiscard);
                         });
                         // */
 
                         console.info(["discarding", tabId, changeInfo, tabInfo, doDiscard]);
                     };
-                    chrome.tabs.onUpdated.addListener(doDiscard);
+                    browser.tabs.onUpdated.addListener(doDiscard);
                 });
             }
 
@@ -190,7 +190,7 @@ function openAndDeleteTabs(payload, updateTabLists) {
     // console.error('delete from source to here');
 
     chrome.storage.local.get(tabs, (rcvd)=>{
-        chrome.tabs.query({currentWindow: true}).then(result=>{
+        browser.tabs.query({currentWindow: true}).then(result=>{
             console.debug(result);// this should do nothing
 
             // loop through idList and indexList
@@ -213,8 +213,8 @@ function openAndDeleteTabs(payload, updateTabLists) {
                 console.debug({id:tabToOpen.id, title:tabToOpen.title});
 
                 if(payload.doOpen){
-                    // chrome.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
-                    chrome.tabs.create({url:tabToOpen.url , active:false}).then((tab)=>{
+                    // browser.tabs.create({url: tabToOpen.url, active:false, discarded:true}); // cannot open tab as discarded
+                    browser.tabs.create({url:tabToOpen.url , active:false}).then((tab)=>{
                         // when tab is opened
                         // We would like it to be discarded
                         const doDiscard=(tabId, changeInfo, tabInfo)=>{
@@ -226,9 +226,9 @@ function openAndDeleteTabs(payload, updateTabLists) {
                             if (tabId != tab.id){return;}
 
                             // /* this
-                            chrome.tabs.discard(tab.id);
+                            browser.tabs.discard(tab.id);
                             // remove this callback function
-                            chrome.tabs.onUpdated.removeListener(doDiscard);
+                            browser.tabs.onUpdated.removeListener(doDiscard);
                             //*/
 
                             /* OR this
@@ -236,15 +236,15 @@ function openAndDeleteTabs(payload, updateTabLists) {
                                 target: {tabId: tabId},
                                 func: ()=>{document.title = '_'+tabToOpen.title+'_';},
                             },() => {
-                                chrome.tabs.discard(tab.id);
+                                browser.tabs.discard(tab.id);
                                 // remove this callback function
-                                chrome.tabs.onUpdated.removeListener(doDiscard);
+                                browser.tabs.onUpdated.removeListener(doDiscard);
                             });
                             // */
 
                             console.info(["discarding", tabId, changeInfo, tabInfo, doDiscard]);
                         };
-                        chrome.tabs.onUpdated.addListener(doDiscard);
+                        browser.tabs.onUpdated.addListener(doDiscard);
                     });
                 }
                 rcvd.tabs[idx[0]][idx[1]]=null; // mark tab we opened

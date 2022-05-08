@@ -58,7 +58,7 @@ function sanitizeConfigMap(input) {
 }
 
 function readConfigData(callbackFunc) {
-    chrome.storage.local.get('config', (result) => {
+    browser.storage.local.get('config').then( (result) => {
         // DO FORMAT CHECK HERE
         console.log('Reading Config', result);
         const cleanConfig = sanitizeConfigMap(result.config);
@@ -90,7 +90,7 @@ function reloadConfigs() {
     readConfigData((config)=>{
         const currentConfigIs=config;
         console.log(currentConfigIs);
-        console.log({chrome_action_onClicked: chrome.action.onClicked});
+        console.log({chrome_action_onClicked: chrome.browserAction.onClicked});
 
         // actionButton
         switch (config.actionButton){
