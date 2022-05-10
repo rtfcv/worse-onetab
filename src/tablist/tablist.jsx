@@ -354,9 +354,26 @@ class Tablist extends React.Component {
     };
     const openOptions=()=>{chrome.runtime.sendMessage({msg:'showOptions'});};
 
+    const saveData = ()=>{
+      chrome.runtime.sendMessage({msg:'getTabMetadata'}, (result)=>{
+        const json = JSON.stringify(result, null, 2);
+        const blob = new Blob([json], {type: "octet/stream"});
+        const url = window.URL.createObjectURL(blob);
+
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.style='display:none';
+        anchor.download = 'worseOneTabData.json';
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+      });
+    }
+
     // const hideit = ()=>{this.setState({showIExport : false});}
 
     document.getElementById('export').addEventListener('click', exportData);
+    document.getElementById('save').addEventListener('click', saveData);
     document.getElementById('openOptions').addEventListener('click', openOptions);
 
     document.title = "Worse-OneTab - Tab Lists";
@@ -374,6 +391,7 @@ class Tablist extends React.Component {
             <h1>List of Stored Tabs</h1>
           </div>
           <button className="btn btn-sm" id="export">Edit</button>
+          <button className="btn btn-sm" id="save">Save</button>
         </div>
 
         <IExportTabs isVisible={this.state.showIExport} hideMe={this.hideit} tabData={this.state.tabData} doneFunc={this.doneFunc}/>
@@ -395,7 +413,7 @@ class Tablist extends React.Component {
 
 chrome.runtime.sendMessage({msg:'readConfigData'}, (config)=>{
   // set theme first and foremost
-  document.documentElement.setAttribute("data-theme", config.theme); 
+  document.documentElement.setAttribute("data-theme", config.theme);
 
   if (config.editMode === 'vim'){
     editorPlugin.push(vim());

@@ -58,6 +58,22 @@ function OptionsEditor(props) {
             if(window.confirm("revert every change?")){doReset();}
         }
 
+        const exportConfig = ()=>{
+          chrome.runtime.sendMessage({msg:'readConfigData'}, (result)=>{
+            const json = JSON.stringify(result, null, 2);
+            const blob = new Blob([json], {type: "octet/stream"});
+            const url = window.URL.createObjectURL(blob) ;
+
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.style='display:none';
+            anchor.download = 'worseOneTabConfig.json';
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+          });
+        }
+
         const doneButton = document.getElementById('configJsonDone');
         cleanList.push(()=>{doneButton.removeEventListener('click', thisDoneFunc)});
         doneButton.addEventListener('click', thisDoneFunc);
@@ -65,6 +81,10 @@ function OptionsEditor(props) {
         const cancelButton = document.getElementById('configJsonCancel');
         cleanList.push(()=>{cancelButton.removeEventListener('click', resetFunc)});
         cancelButton.addEventListener('click', resetFunc);
+
+        const exportButton = document.getElementById('configJsonDownload');
+        cleanList.push(()=>{exportButton.removeEventListener('click', exportConfig)});
+        exportButton.addEventListener('click', exportConfig);
 
 
         return ()=>{for (const f of cleanList){f();}};
@@ -98,6 +118,7 @@ function OptionsEditor(props) {
           <div className="flex place-content-center gap-2">
               <button className="btn btn-sm" id="configJsonDone">done</button>
               <button className="btn btn-sm" id="configJsonCancel">cancel</button>
+              <button className="btn btn-sm" id="configJsonDownload">export</button>
           </div>
       </div>
     );
