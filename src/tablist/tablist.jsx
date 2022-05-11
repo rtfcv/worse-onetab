@@ -390,8 +390,10 @@ class Tablist extends React.Component {
           <div className="prose w-fit">
             <h1>List of Stored Tabs</h1>
           </div>
-          <button className="btn btn-sm" id="export">Edit</button>
-          <button className="btn btn-sm" id="save">Save</button>
+          <div className="flex flex-nowrap justify-center items-baseline gap-x-1">
+            <button className="btn btn-sm" id="export">Edit</button>
+            <button className="btn btn-sm" id="save">Save</button>
+          </div>
         </div>
 
         <IExportTabs isVisible={this.state.showIExport} hideMe={this.hideit} tabData={this.state.tabData} doneFunc={this.doneFunc}/>
