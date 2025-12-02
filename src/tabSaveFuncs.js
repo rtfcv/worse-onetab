@@ -1,8 +1,23 @@
+/**
+ * Helper function to query unpinned tabs in the current window
+ * @returns {Promise<chrome.tabs.Tab[]>} Promise that resolves to array of unpinned tabs in current window
+ */
+function queryUnpinnedCurrentWindowTabs() {
+    return chrome.storage.local.get("storePinned").then((data)=>{
+        const pinnedValue = data.storePinned;
+        if (pinnedValue) {
+            return chrome.tabs.query({currentWindow: true});
+        } else {
+            return chrome.tabs.query({currentWindow: true, pinned: false});
+        }
+    }).catch(error=>{console.error(error);});
+}
+
 function saveTabsToLocal(key) {
     /**
      * is this thing EVEN USED?
      * */
-    chrome.tabs.query({currentWindow: true}).then(result=>{
+    queryUnpinnedCurrentWindowTabs().then(result=>{
         console.log(result);
         chrome.storage.local.set({key: result});
     }); 
@@ -22,7 +37,7 @@ function saveCurrentTabs(sendResponse) {
     const tabs = 'tabs';
 
     chrome.storage.local.get(tabs, (rcvd)=>{
-        chrome.tabs.query({currentWindow: true}).then(result=>{
+        queryUnpinnedCurrentWindowTabs().then(result=>{
             // do something with result
             (typeof sendResponse === 'function') && sendResponse(result);
 
@@ -109,7 +124,7 @@ function openAndDeleteATab(payload, updateTabLists) {
     console.warn('Deprecated! use openAndDeleteTabs instead in Future');
 
     chrome.storage.local.get(tabs, (rcvd)=>{
-        chrome.tabs.query({currentWindow: true}).then(result=>{
+        queryUnpinnedCurrentWindowTabs().then(result=>{
             // console.log({received: rcvd});
             console.info({payload: payload});
             const tabToOpen = rcvd.tabs[payload.index[0]][payload.index[1]];
@@ -190,7 +205,7 @@ function openAndDeleteTabs(payload, updateTabLists) {
     // console.error('delete from source to here');
 
     chrome.storage.local.get(tabs, (rcvd)=>{
-        chrome.tabs.query({currentWindow: true}).then(result=>{
+        queryUnpinnedCurrentWindowTabs().then(result=>{
             console.debug(result);// this should do nothing
 
             // loop through idList and indexList
