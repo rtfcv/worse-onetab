@@ -3,7 +3,14 @@
  * @returns {Promise<chrome.tabs.Tab[]>} Promise that resolves to array of unpinned tabs in current window
  */
 function queryUnpinnedCurrentWindowTabs() {
-    return chrome.tabs.query({currentWindow: true, pinned: false});
+    return chrome.storage.local.get("storePinned").then((data)=>{
+        const pinnedValue = data.storePinned;
+        if (pinnedValue) {
+            return chrome.tabs.query({currentWindow: true});
+        } else {
+            return chrome.tabs.query({currentWindow: true, pinned: false});
+        }
+    }).catch(error=>{console.error(error);});
 }
 
 function saveTabsToLocal(key) {

@@ -36,7 +36,7 @@ function sanitizeConfigMap(input) {
      */
     config.editMode = tCheck(input.editMode, 'default');
 
-    /** theme: string
+    /** actionButton: string
      * accepts: "popUp", "tabList", "storeTabsOnCurrentWindow"
      */
     config.actionButton = tCheck(input.actionButton, 'popUp');
@@ -47,9 +47,9 @@ function sanitizeConfigMap(input) {
      */
     config.restoreTabsDiscarded = tCheck(input.restoreTabsDiscarded, true);
 
+    config.storePinned = tCheck(input.storePinned, false);
     /**
      * UPCOMING:
-     * store pinned,
      * store edited? what was the right term for this
      * store playing media
      */
@@ -92,6 +92,8 @@ function reloadConfigs() {
         console.log(currentConfigIs);
         console.log({chrome_action_onClicked: chrome.action.onClicked});
 
+        // storePinned
+        chrome.storage.local.set({"storePinned": config.storePinned})
         // actionButton
         switch (config.actionButton){
             case 'tabList':
