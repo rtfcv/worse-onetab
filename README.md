@@ -15,7 +15,8 @@ Currently only available in form of json.
   "theme": "dark",
   "editMode": "default",
   "actionButton": "popUp",
-  "restoreTabsDiscarded": true
+  "restoreTabsDiscarded": true,
+  "storePinned": false
 }
 ```
 
