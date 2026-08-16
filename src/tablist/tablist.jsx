@@ -363,7 +363,7 @@ class Tablist extends React.Component {
         const anchor = document.createElement('a');
         anchor.href = url;
         anchor.style='display:none';
-        anchor.download = 'worseOneTabData.json';
+        anchor.download = 'tabAtticData.json';
         document.body.appendChild(anchor);
         anchor.click();
         document.body.removeChild(anchor);
@@ -376,7 +376,7 @@ class Tablist extends React.Component {
     document.getElementById('save').addEventListener('click', saveData);
     document.getElementById('openOptions').addEventListener('click', openOptions);
 
-    document.title = "Worse-OneTab - Tab Lists";
+    document.title = "tab-attic - Tab Lists";
     document.getElementById('deleteData').addEventListener('click', deleteData);
   }
 

@@ -46,7 +46,7 @@ class Popup extends React.Component {
     return (
       <div id="popUP" className="p-6">
         <div className="prose text-center content-center justify-center max-w-full">
-            <h3 className="whitespace-nowrap w-full">worse-onetab</h3>
+            <h3 className="whitespace-nowrap w-full">tab-attic</h3>
         </div>
         <div className="p-2"/>
         <div className="w-max">

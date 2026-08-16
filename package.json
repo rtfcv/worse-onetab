@@ -1,14 +1,14 @@
 {
-  "name": "worse-onetab",
-  "version": "1.1.0",
-  "description": "minimalist clone of one-tab",
+  "name": "tab-attic",
+  "version": "1.2.0",
+  "description": "minimalist browser extension for stashing away open tabs",
   "main": "index.js",
   "scripts": {
     "build": "tailwindcss -i ./src/style.css -o ./dist/style.css && webpack",
     "prod-build": "NODE_ENV=production tailwindcss -i ./src/style.css -o ./dist/style.css && webpack --config webpack.config.prod.js",
     "prod-build-win": "set NODE_ENV=production && tailwindcss -i ./src/style.css -o ./dist/style.css && webpack --config webpack.config.prod.js",
-    "release": "set NODE_ENV=production && tailwindcss -i ./src/style.css -o ./release/style.css && webpack --config webpack.config.prod.js && 7z a ./worse-onetab.zip ./release",
-    "release-win": "set NODE_ENV=production && tailwindcss -i ./src/style.css -o ./release/style.css && webpack --config webpack.config.prod.js && 7z a .\\worse-onetab.zip .\\release",
+    "release": "set NODE_ENV=production && tailwindcss -i ./src/style.css -o ./release/style.css && webpack --config webpack.config.prod.js && 7z a ./tab-attic.zip ./release",
+    "release-win": "set NODE_ENV=production && tailwindcss -i ./src/style.css -o ./release/style.css && webpack --config webpack.config.prod.js && 7z a .\\tab-attic.zip .\\release",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "rtfcv",

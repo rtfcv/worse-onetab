@@ -67,7 +67,7 @@ function OptionsEditor(props) {
             const anchor = document.createElement('a');
             anchor.href = url;
             anchor.style='display:none';
-            anchor.download = 'worseOneTabConfig.json';
+            anchor.download = 'tabAtticConfig.json';
             document.body.appendChild(anchor);
             anchor.click();
             document.body.removeChild(anchor);
@@ -157,7 +157,7 @@ class Options extends React.Component {
         });
     }
     componentDidMount(){
-        document.title = "OneTab - Options";
+        document.title = "tab-attic - Options";
     }
 
   render() {

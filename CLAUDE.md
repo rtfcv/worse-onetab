@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-worse-onetab is a Chrome Manifest V3 extension: a minimalist, open-source alternative to OneTab for stashing and restoring browser tabs. It's a React app (three independent entry points) driven by a service worker that owns all state via `chrome.storage.local`.
+tab-attic is a Chrome Manifest V3 extension: a minimalist, open-source tool for stashing and restoring browser tabs. It's a React app (three independent entry points) driven by a service worker that owns all state via `chrome.storage.local`.
 
 ## Commands
 
@@ -13,7 +13,7 @@ npm install
 npm run build         # dev build -> ./dist  (unpacked extension you load into Chrome)
 npm run prod-build     # production build -> ./dist (minified)
 npm run prod-build-win # same, for Windows shells (uses `set` instead of env var prefix)
-npm run release        # production build -> ./release, then zips it to worse-onetab.zip (Linux/mac, needs 7z)
+npm run release        # production build -> ./release, then zips it to tab-attic.zip (Linux/mac, needs 7z)
 npm run release-win    # same, for Windows shells
 ```
 

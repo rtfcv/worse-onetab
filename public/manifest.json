@@ -1,7 +1,7 @@
 {
-  "name": "worse-onetab",
-  "description": "worse-onetab",
-  "version": "1.1.0",
+  "name": "tab-attic",
+  "description": "Stash your open tabs away and bring them back later.",
+  "version": "1.2.0",
   "icons": {"128": "icons/icon.png" },
   "manifest_version": 3,
   "permissions": [

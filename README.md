@@ -1,6 +1,6 @@
-# worse-onetab
+# tab-attic
 
-opensource and simplist alternative to [OneTab](https://www.one-tab.com/).  
+opensource and simplist browser extension for stashing away open tabs and bringing them back later.  
 
 Inspired by [better-onetab](https://github.com/cnwangjie/better-onetab), which seems to be no-longer maintained, but is worse in every way except for performance.  
 
